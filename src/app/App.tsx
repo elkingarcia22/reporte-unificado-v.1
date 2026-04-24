@@ -22,6 +22,8 @@ export default function App() {
   const [downloadComplete, setDownloadComplete] = useState(false);
   const [showReportOptions, setShowReportOptions] = useState(false);
   const [reportsInQueue, setReportsInQueue] = useState(0);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -195,11 +197,33 @@ export default function App() {
   };
 
   const handleCloseDownload = () => {
+    // Si está descargando y no está completo, mostrar confirmación
+    if (isDownloading && !downloadComplete && !isCancelled) {
+      setShowCancelConfirmation(true);
+    } else {
+      // Si ya está completo o fue cancelado, cerrar directamente
+      setIsDownloading(false);
+      setDownloadProgress(0);
+      setDownloadComplete(false);
+      setIsDownloadMinimized(false);
+      setReportsInQueue(0);
+      setIsCancelled(false);
+      setShowCancelConfirmation(false);
+    }
+  };
+
+  const handleConfirmCancel = () => {
+    setIsCancelled(true);
     setIsDownloading(false);
     setDownloadProgress(0);
     setDownloadComplete(false);
     setIsDownloadMinimized(false);
     setReportsInQueue(0);
+    setShowCancelConfirmation(false);
+  };
+
+  const handleKeepDownloading = () => {
+    setShowCancelConfirmation(false);
   };
 
   const handleClosePdfViewer = () => {
@@ -841,6 +865,15 @@ export default function App() {
                           </svg>
                           Minimizar y continuar
                         </button>
+                        <button
+                          onClick={handleCloseDownload}
+                          className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                          </svg>
+                          Cancelar descarga
+                        </button>
                       </>
                     )}
 
@@ -1432,6 +1465,44 @@ export default function App() {
             )}
           </div>
         </button>
+      )}
+
+      {/* Modal de confirmación para cancelar descarga */}
+      {showCancelConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+            <div className="flex gap-3 mb-4">
+              <div className="bg-[#FDEAEA] rounded-full p-3 flex-shrink-0">
+                <svg className="w-6 h-6 text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base mb-1">
+                  ¿Cancelar descarga?
+                </h3>
+                <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-sm">
+                  Si cancelas, los reportes en progreso no se completarán. ¿Deseas continuar?
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleKeepDownloading}
+                className="flex-1 bg-white text-[#303A47] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+              >
+                Continuar descargando
+              </button>
+              <button
+                onClick={handleConfirmCancel}
+                className="flex-1 bg-[#D92D20] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#BA2318] transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
