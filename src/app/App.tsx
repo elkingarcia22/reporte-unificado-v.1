@@ -102,8 +102,8 @@ export default function App() {
 
   const handleContinueGenerating = () => {
     setShowReportOptions(false);
-    // Incrementar contador de reportes
-    setReportsInQueue(prev => prev + 1);
+    // Resetear contador a 1 para nueva generación (no incrementar)
+    setReportsInQueue(1);
     // Resetear solo los campos del formulario pero mantener el drawer abierto
     setSearchTerm('');
     setSelectedColaborador('');
