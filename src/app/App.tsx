@@ -722,9 +722,25 @@ export default function App() {
                   {showReportOptions ? 'Reporte en cola' : 'Crear Reporte Unificado'}
                 </h2>
                 {isDownloading && reportsInQueue > 0 && (
-                  <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs mt-1">
-                    {reportsInQueue} {reportsInQueue === 1 ? 'reporte' : 'reportes'} en cola
-                  </p>
+                  <div className="mt-2">
+                    {/* Barra de progreso compacta */}
+                    <div className="mb-2">
+                      <div className="w-full bg-[#E7E8EA] rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                          style={{ width: `${downloadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs">
+                        {reportsInQueue} {reportsInQueue === 1 ? 'reporte' : 'reportes'} en cola
+                      </p>
+                      <p className="font-['Noto_Sans:Bold',sans-serif] text-xs text-[#0C5BEF]">
+                        {downloadProgress}%
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
               <button
@@ -759,23 +775,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Barra de progreso */}
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47]">
-                        {downloadComplete ? 'Reportes_Masivos_Q2_2025.zip' : 'Procesando...'}
-                      </p>
-                      <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
-                        {downloadProgress}%
-                      </p>
-                    </div>
-                    <div className="w-full bg-[#E7E8EA] rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                        style={{ width: `${downloadProgress}%` }}
-                      />
-                    </div>
-                  </div>
 
                   {downloadComplete ? (
                     <div className="bg-[#E6F7F0] border border-[#0A8754] rounded-lg p-3 flex gap-2">
