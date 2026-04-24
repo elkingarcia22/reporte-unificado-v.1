@@ -41,17 +41,34 @@ export default function App() {
   }, []);
 
   const colaboradores = [
-    { id: 1, name: 'Adam Andres Abril Acebes', initials: 'AA' },
-    { id: 2, name: 'Andres Camilo Torres', initials: 'AT' },
-    { id: 3, name: 'Bayron Jesid Garcia', initials: 'BG' },
-    { id: 4, name: 'Estefanía Rojas Acosta', initials: 'ER' },
-    { id: 5, name: 'Elkin Garcia Salazar', initials: 'EG' },
-    { id: 6, name: 'María González López', initials: 'MG' },
-    { id: 7, name: 'Carlos Martínez Ruiz', initials: 'CM' },
-    { id: 8, name: 'Ana Fernández Castro', initials: 'AF' },
-    { id: 9, name: 'Luis Ramírez Pérez', initials: 'LR' },
-    { id: 10, name: 'Sofia Hernández Vega', initials: 'SH' },
+    { id: 1, name: 'Adam Andres Abril Acebes', initials: 'AA', area: 'Tecnología', lider: 'Juan Pérez', pais: 'México' },
+    { id: 2, name: 'Andres Camilo Torres', initials: 'AT', area: 'Ventas', lider: 'María González', pais: 'Colombia' },
+    { id: 3, name: 'Bayron Jesid Garcia', initials: 'BG', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Colombia' },
+    { id: 4, name: 'Estefanía Rojas Acosta', initials: 'ER', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina' },
+    { id: 5, name: 'Elkin Garcia Salazar', initials: 'EG', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Colombia' },
+    { id: 6, name: 'María González López', initials: 'MG', area: 'Recursos Humanos', lider: 'Ana Martínez', pais: 'Chile' },
+    { id: 7, name: 'Carlos Martínez Ruiz', initials: 'CM', area: 'Operaciones', lider: 'Juan Pérez', pais: 'Perú' },
+    { id: 8, name: 'Ana Fernández Castro', initials: 'AF', area: 'Ventas', lider: 'María González', pais: 'México' },
+    { id: 9, name: 'Luis Ramírez Pérez', initials: 'LR', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina' },
+    { id: 10, name: 'Sofia Hernández Vega', initials: 'SH', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Chile' },
   ];
+
+  // Función para contar colaboradores según el alcance y valor seleccionado
+  const getColaboradoresCount = (alcanceType: string, fieldValue: string): number => {
+    if (alcanceType === 'Toda la empresa') {
+      return colaboradores.length;
+    }
+    if (alcanceType === 'Área') {
+      return colaboradores.filter(c => c.area === fieldValue).length;
+    }
+    if (alcanceType === 'Líder') {
+      return colaboradores.filter(c => c.lider === fieldValue).length;
+    }
+    if (alcanceType === 'País') {
+      return colaboradores.filter(c => c.pais === fieldValue).length;
+    }
+    return 0;
+  };
 
   const filteredColaboradores = searchTerm
     ? colaboradores.filter(c =>
@@ -985,7 +1002,7 @@ export default function App() {
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                         </svg>
                         <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                          Se generarán reportes para los 142 colaboradores analizados en el ciclo actual.
+                          Se generarán reportes para los {getColaboradoresCount('Toda la empresa', '')} colaboradores analizados en el ciclo actual.
                         </p>
                       </div>
                     )}
@@ -1024,6 +1041,16 @@ export default function App() {
                           Debes seleccionar un área para generar los reportes masivos.
                         </p>
                       )}
+                      {alcanceFieldValue && (
+                        <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
+                          <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                          </svg>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
+                            Se generarán reportes para los {getColaboradoresCount('Área', alcanceFieldValue)} colaboradores del área seleccionada.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1057,6 +1084,16 @@ export default function App() {
                         <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
                           Debes seleccionar un líder para generar los reportes masivos.
                         </p>
+                      )}
+                      {alcanceFieldValue && (
+                        <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
+                          <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                          </svg>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
+                            Se generarán reportes para los {getColaboradoresCount('Líder', alcanceFieldValue)} colaboradores bajo este líder.
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
@@ -1092,6 +1129,16 @@ export default function App() {
                         <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
                           Debes seleccionar un país para generar los reportes masivos.
                         </p>
+                      )}
+                      {alcanceFieldValue && (
+                        <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
+                          <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                          </svg>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
+                            Se generarán reportes para los {getColaboradoresCount('País', alcanceFieldValue)} colaboradores del país seleccionado.
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
