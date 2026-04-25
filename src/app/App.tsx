@@ -24,6 +24,8 @@ export default function App() {
   const [reportsInQueue, setReportsInQueue] = useState(0);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [showAnalysisList, setShowAnalysisList] = useState(false);
+  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' }>>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -178,20 +180,40 @@ export default function App() {
 
   const startMassiveDownload = () => {
     setIsDownloading(true);
-    setDownloadProgress(0);
-    setDownloadComplete(false);
     setIsDownloadMinimized(false);
-    setReportsInQueue(1); // Iniciar con 1 reporte en cola
 
-    // Simular progreso de descarga
+    const reportId = Date.now();
+    const reportName = `Reporte_Masivo_${reportId}.zip`;
+
+    // Agregar nuevo reporte a la lista de descarga
+    setDownloadingReports((prev) => [
+      ...prev,
+      { id: reportId, name: reportName, progress: 0, status: 'downloading' }
+    ]);
+
+    setReportsInQueue((prev) => prev + 1);
+
+    // Simular progreso de descarga más lento
     const interval = setInterval(() => {
-      setDownloadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
+      setDownloadingReports((prevReports) => {
+        const updated = prevReports.map((report) => {
+          if (report.id === reportId && report.status === 'downloading') {
+            if (report.progress >= 100) {
+              clearInterval(interval);
+              return { ...report, progress: 100, status: 'completed' };
+            }
+            return { ...report, progress: report.progress + 1 };
+          }
+          return report;
+        });
+
+        // Verificar si hay descargas completadas
+        const allCompleted = updated.every((r) => r.status === 'completed');
+        if (allCompleted && updated.length > 0) {
           setDownloadComplete(true);
-          return 100;
         }
-        return prev + 5;
+
+        return updated;
       });
     }, 300);
   };
@@ -199,6 +221,7 @@ export default function App() {
   const handleCloseDownload = () => {
     // Si está descargando y no está completo, mostrar confirmación
     if (isDownloading && !downloadComplete && !isCancelled) {
+      console.log('Opening cancel confirmation modal from handleCloseDownload');
       setShowCancelConfirmation(true);
     } else {
       // Si ya está completo o fue cancelado, cerrar directamente
@@ -207,22 +230,26 @@ export default function App() {
       setDownloadComplete(false);
       setIsDownloadMinimized(false);
       setReportsInQueue(0);
+      setDownloadingReports([]);
       setIsCancelled(false);
       setShowCancelConfirmation(false);
     }
   };
 
   const handleConfirmCancel = () => {
+    console.log('handleConfirmCancel called');
     setIsCancelled(true);
     setIsDownloading(false);
     setDownloadProgress(0);
     setDownloadComplete(false);
     setIsDownloadMinimized(false);
     setReportsInQueue(0);
+    setDownloadingReports([]);
     setShowCancelConfirmation(false);
   };
 
   const handleKeepDownloading = () => {
+    console.log('handleKeepDownloading called');
     setShowCancelConfirmation(false);
   };
 
@@ -244,6 +271,87 @@ export default function App() {
     );
   }
 
+  // Si está mostrando la lista de análisis
+  if (showAnalysisList) {
+    const analysisList = [
+      { id: 1, name: 'Análisis de talento semestre 1 2025', date: '10 enero 2025', participants: 200 },
+      { id: 2, name: 'Análisis de talento semestre 2 2024', date: '10 diciembre 2024', participants: 200 },
+      { id: 3, name: 'Análisis de talento semestre 1 2024', date: '10 enero 2024', participants: 180 },
+      { id: 4, name: 'Análisis de talento semestre 2 2023', date: '10 diciembre 2023', participants: 200 },
+      { id: 5, name: 'Análisis de talento semestre 1 2023', date: '10 enero 2023', participants: 200 },
+      { id: 6, name: 'Análisis de talento semestre 2 2022', date: '10 diciembre 2022', participants: 180 },
+      { id: 7, name: 'Análisis de talento semestre 1 2022', date: '10 enero 2022', participants: 150 },
+      { id: 8, name: 'Análisis de talento semestre 2 2021', date: '10 diciembre 2021', participants: 100 },
+      { id: 9, name: 'Análisis de talento semestre 1 2021', date: '10 enero 2021', participants: 180 },
+      { id: 10, name: 'Análisis de talento semestre 2 2020', date: '10 diciembre 2020', participants: 180 },
+    ];
+
+    return (
+      <div className="bg-[#F3F3F4] flex flex-col h-screen w-screen overflow-hidden">
+        {/* Header */}
+        <div className="bg-white px-6 py-6 border-b border-[#D0D2D5]">
+          <h1 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-2xl text-[#303A47] mb-2">Matriz de talento</h1>
+          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F]">
+            Crea análisis de talento para evaluar, desarrollar y retener el talento en tu empresa, así podrás tomar decisiones basadas en datos.
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="bg-white rounded-lg border border-[#D0D2D5] overflow-hidden">
+            {/* Tabla */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[#D0D2D5] bg-[#F9F9F9]">
+                    <th className="px-4 py-3 text-left font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm text-[#303A47]">Nombre del análisis de talento</th>
+                    <th className="px-4 py-3 text-left font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm text-[#303A47]">Fecha de creación</th>
+                    <th className="px-4 py-3 text-left font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm text-[#303A47]">Participantes</th>
+                    <th className="px-4 py-3 text-left font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm text-[#303A47]">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analysisList.map((analysis) => (
+                    <tr key={analysis.id} className="border-b border-[#E7E8EA] hover:bg-[#F9F9F9] transition-colors">
+                      <td className="px-4 py-3 font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47]">{analysis.name}</td>
+                      <td className="px-4 py-3 font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F]">{analysis.date}</td>
+                      <td className="px-4 py-3 font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47]">{analysis.participants}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => {
+                            setShowAnalysisList(false);
+                          }}
+                          className="text-[#0C5BEF] font-['Noto_Sans:Regular',sans-serif] text-sm hover:underline"
+                        >
+                          Ver análisis
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginación */}
+            <div className="flex items-center justify-between px-4 py-4 border-t border-[#D0D2D5]">
+              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">Mostrando 1-10 de {analysisList.length} análisis</p>
+              <div className="flex items-center gap-2">
+                <button className="px-2 py-1 rounded border border-[#D0D2D5] text-[#303A47] font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#F3F3F4]">«</button>
+                <button className="px-2 py-1 rounded border border-[#D0D2D5] text-[#303A47] font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#F3F3F4]">‹</button>
+                <button className="px-2 py-1 rounded bg-[#0C5BEF] text-white font-['Noto_Sans:Regular',sans-serif] text-xs">1</button>
+                <button className="px-2 py-1 rounded border border-[#D0D2D5] text-[#303A47] font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#F3F3F4]">2</button>
+                <button className="px-2 py-1 rounded border border-[#D0D2D5] text-[#303A47] font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#F3F3F4]">›</button>
+                <button className="px-2 py-1 rounded border border-[#D0D2D5] text-[#303A47] font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#F3F3F4]">»</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('Rendering main component - showCancelConfirmation:', showCancelConfirmation);
+
   return (
     <div className="bg-[#F3F3F4] flex flex-col h-screen w-screen overflow-hidden relative">
       {/* Header */}
@@ -251,7 +359,13 @@ export default function App() {
         <div className="flex gap-4 items-start w-full">
           <div className="flex gap-2.5 items-start flex-1 min-w-0">
             {/* Botón Regresar */}
-            <div className="flex items-center px-4 py-1 rounded-[5px] shrink-0">
+            <button
+              onClick={() => {
+                setShowPdfViewer(false);
+                setShowAnalysisList(true);
+              }}
+              className="flex items-center px-4 py-1 rounded-[5px] shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
+            >
               <div className="flex gap-2.5 items-center text-[#0C5BEF]">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
@@ -260,7 +374,7 @@ export default function App() {
                   <p className="leading-[22px]">Regresar</p>
                 </div>
               </div>
-            </div>
+            </button>
 
             {/* Título */}
             <div className="flex gap-1 items-center min-h-8 flex-1 min-w-0">
@@ -745,27 +859,6 @@ export default function App() {
                 <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl">
                   {showReportOptions ? 'Reporte en cola' : 'Crear Reporte Unificado'}
                 </h2>
-                {isDownloading && reportsInQueue > 0 && (
-                  <div className="mt-2">
-                    {/* Barra de progreso compacta */}
-                    <div className="mb-2">
-                      <div className="w-full bg-[#E7E8EA] rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                          style={{ width: `${downloadProgress}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs">
-                        {reportsInQueue} {reportsInQueue === 1 ? 'reporte' : 'reportes'} en cola
-                      </p>
-                      <p className="font-['Noto_Sans:Bold',sans-serif] text-xs text-[#0C5BEF]">
-                        {downloadProgress}%
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
               <button
                 onClick={() => handleCloseDrawer()}
@@ -779,111 +872,135 @@ export default function App() {
 
             {/* Content */}
             {showReportOptions ? (
-              // Vista de progreso de descarga
-              <div className="flex-1 flex flex-col px-6 py-6">
-                {/* Encabezado con progreso */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-[#E6F7F0] rounded-full p-3">
-                      <svg className="w-8 h-8 text-[#0A8754]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base mb-1">
-                        {downloadComplete ? 'Descarga completada' : 'Generando reportes masivos'}
-                      </h3>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-sm">
-                        {alcance === 'Toda la empresa' ? '142 colaboradores' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
-                      </p>
-                    </div>
-                  </div>
+              // Vista de progreso de descarga - Lista de reportes
+              <div className="flex-1 flex flex-col px-6 py-6 overflow-hidden">
+                {/* Encabezado con info */}
+                <div className="mb-4">
+                  <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base">
+                    {downloadComplete ? 'Descargas completadas' : 'Descargando reportes'}
+                  </h3>
+                </div>
 
-
-                  {downloadComplete ? (
-                    <div className="bg-[#E6F7F0] border border-[#0A8754] rounded-lg p-3 flex gap-2">
-                      <svg className="w-5 h-5 text-[#0A8754] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                      </svg>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                        Los reportes se han generado exitosamente y están listos para descargar.
-                      </p>
+                {/* Lista de reportes descargando */}
+                <div className="flex-1 overflow-y-auto mb-4">
+                  {downloadingReports.length > 0 ? (
+                    <div className="space-y-3">
+                      {downloadingReports.map((report) => (
+                        <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              {report.status === 'completed' ? (
+                                <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                  </svg>
+                                </div>
+                              ) : (
+                                <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              )}
+                              <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                {report.name}
+                              </p>
+                            </div>
+                            <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF] ml-2">
+                              {report.progress}%
+                            </p>
+                          </div>
+                          {/* Barra de progreso */}
+                          <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden mb-2">
+                            <div
+                              className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                              style={{ width: `${report.progress}%` }}
+                            />
+                          </div>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                            {alcance === 'Toda la empresa' ? '142 colaboradores' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <div className="bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
-                      <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                      </svg>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                        La descarga está en progreso. Puedes seguir generando reportes o minimizar esta ventana.
-                      </p>
-                    </div>
+                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] text-center py-8">
+                      No hay reportes en descarga
+                    </p>
                   )}
                 </div>
 
-                {/* Separador */}
-                <div className="border-t border-[#D0D2D5] my-4"></div>
+                {/* Mensaje de estado */}
+                {downloadComplete ? (
+                  <div className="bg-[#F0F9F7] border border-[#10B981] rounded-lg p-3 flex gap-2 mb-4">
+                    <svg className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#065F46]">
+                      Reportes generados y descargados. Listos para visualizar.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2 mb-4">
+                    <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
+                      La descarga está en progreso. Puedes seguir generando reportes o minimizar esta ventana.
+                    </p>
+                  </div>
+                )}
 
                 {/* Opciones de acción */}
-                <div className="flex-1 flex flex-col justify-end">
-                  <h4 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm mb-3">
-                    ¿Qué deseas hacer ahora?
-                  </h4>
+                <div className="space-y-3">
+                  {downloadComplete ? (
+                    <>
+                      <button
+                        className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                        </svg>
+                        Abrir carpeta de descargas
+                      </button>
+                      <button
+                        onClick={handleContinueGenerating}
+                        className="w-full bg-white text-[#0C5BEF] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#0C5BEF] hover:bg-[#F3F3F4] transition-colors"
+                      >
+                        Generar más reportes
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleContinueGenerating}
+                        className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors"
+                      >
+                        Generar más reportes
+                      </button>
+                      <button
+                        onClick={handleExitAndDownload}
+                        className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                      >
+                        Minimizar y continuar
+                      </button>
+                      <button
+                        onClick={handleCloseDownload}
+                        className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                        Cancelar descarga
+                      </button>
+                    </>
+                  )}
 
-                  <div className="space-y-3">
-                    {downloadComplete ? (
-                      <>
-                        <button
-                          className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
-                          </svg>
-                          Abrir carpeta de descargas
-                        </button>
-                        <button
-                          onClick={handleContinueGenerating}
-                          className="w-full bg-white text-[#0C5BEF] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#0C5BEF] hover:bg-[#F3F3F4] transition-colors"
-                        >
-                          Generar más reportes
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={handleContinueGenerating}
-                          className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors"
-                        >
-                          Generar más reportes
-                        </button>
-                        <button
-                          onClick={handleExitAndDownload}
-                          className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 13H5v-2h14v2z"/>
-                          </svg>
-                          Minimizar y continuar
-                        </button>
-                        <button
-                          onClick={handleCloseDownload}
-                          className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                          </svg>
-                          Cancelar descarga
-                        </button>
-                      </>
-                    )}
-
-                    <button
-                      onClick={() => handleCloseDrawer()}
-                      className="w-full text-[#5C646F] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm hover:bg-[#F3F3F4] transition-colors"
-                    >
-                      Cerrar
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleCloseDrawer()}
+                    className="w-full text-[#5C646F] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm hover:bg-[#F3F3F4] transition-colors"
+                  >
+                    Cerrar
+                  </button>
                 </div>
               </div>
             ) : (
@@ -1301,7 +1418,7 @@ export default function App() {
                   </label>
                   <span className={`px-3 py-1 rounded-full text-xs font-['Helvetica_Now_Text_:Bold',sans-serif] flex items-center gap-1 ${
                     totalPeso === 100
-                      ? 'bg-[#E6F7F0] text-[#0A8754]'
+                      ? 'bg-[#F3F3F4] text-[#5C646F]'
                       : 'bg-[#FEF3F2] text-[#D92D20]'
                   }`}>
                     {totalPeso === 100 ? (
@@ -1361,32 +1478,42 @@ export default function App() {
 
       {/* Panel de progreso de descarga masiva */}
       {isDownloading && !isDrawerOpen && !isDownloadMinimized && (
-        <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50">
+        <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50 max-h-[500px] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#D0D2D5]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#D0D2D5] flex-shrink-0">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <svg className="w-5 h-5 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
-                </svg>
+                {downloadComplete ? (
+                  <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                    </svg>
+                  </div>
+                ) : (
+                  <svg className="w-5 h-5 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+                  </svg>
+                )}
                 <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
-                  {downloadComplete ? 'Descarga completada' : 'Generando reportes masivos'}
+                  {downloadComplete ? 'Descargas completadas' : 'Descargando reportes'}
                 </h3>
               </div>
-              {reportsInQueue > 0 && (
+              {downloadingReports.length > 0 && (
                 <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs ml-7">
-                  {reportsInQueue} {reportsInQueue === 1 ? 'reporte' : 'reportes'} en cola
+                  {downloadingReports.length} {downloadingReports.length === 1 ? 'reporte' : 'reportes'} en cola
                 </p>
               )}
             </div>
             <div className="flex items-center gap-1">
               <button
-                onClick={() => setIsDownloadMinimized(true)}
+                onClick={() => {
+                  setIsDownloadMinimized(true);
+                }}
                 className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
                 title="Minimizar"
               >
-                <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 13H5v-2h14v2z"/>
+                <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M6 9l6 6 6-6"/>
                 </svg>
               </button>
               <button
@@ -1401,109 +1528,197 @@ export default function App() {
             </div>
           </div>
 
-          {/* Body */}
-          <div className="px-4 py-4">
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47]">
-                  {downloadComplete ? 'Reportes_Masivos_Q2_2025.zip' : 'Procesando 142 colaboradores...'}
-                </p>
-                <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
-                  {downloadProgress}%
-                </p>
-              </div>
-              {/* Barra de progreso */}
-              <div className="w-full bg-[#E7E8EA] rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                  style={{ width: `${downloadProgress}%` }}
-                />
-              </div>
-            </div>
-
-            {downloadComplete ? (
-              <div className="flex gap-2">
-                <button className="flex-1 bg-[#0C5BEF] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#0A4BC7] transition-colors">
-                  Abrir carpeta
-                </button>
-                <button
-                  onClick={handleCloseDownload}
-                  className="flex-1 bg-white text-[#303A47] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                >
-                  Cerrar
-                </button>
+          {/* Body - List of Reports */}
+          <div className="px-4 py-4 overflow-y-auto flex-1">
+            {downloadingReports.length > 0 ? (
+              <div className="space-y-3">
+                {downloadingReports.map((report) => (
+                  <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate flex-1">
+                        {report.name}
+                      </p>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
+                          {report.progress}%
+                        </p>
+                        {report.status === 'downloading' && (
+                          <button
+                            onClick={() => setShowCancelConfirmation(true)}
+                            className="hover:bg-[#F3F3F4] rounded p-1 transition-colors"
+                            title="Cancelar"
+                          >
+                            <svg className="w-3 h-3 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {/* Barra de progreso */}
+                    <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                        style={{ width: `${report.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                Puedes minimizar esta ventana y seguir trabajando
+                No hay reportes en descarga
               </p>
             )}
           </div>
+
+          {/* Footer Actions */}
+          {downloadComplete && downloadingReports.length > 0 ? (
+            <div className="px-4 py-3 border-t border-[#D0D2D5] flex gap-2 flex-shrink-0">
+              <button className="flex-1 bg-[#0C5BEF] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#0A4BC7] transition-colors">
+                Abrir carpeta
+              </button>
+              <button
+                onClick={handleCloseDownload}
+                className="flex-1 bg-white text-[#303A47] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          ) : (
+            <div className="px-4 py-3 border-t border-[#D0D2D5] flex-shrink-0">
+              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                Puedes minimizar esta ventana y seguir trabajando
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Indicador minimizado de descarga */}
-      {isDownloading && !isDrawerOpen && isDownloadMinimized && (
-        <button
-          onClick={() => setIsDownloadMinimized(false)}
-          className="fixed bottom-6 right-6 bg-white rounded-full shadow-2xl border border-[#D0D2D5] p-4 z-50 hover:scale-105 transition-transform"
-          title={`Ver progreso de descarga - ${reportsInQueue} ${reportsInQueue === 1 ? 'reporte' : 'reportes'} en cola`}
-        >
-          <div className="relative">
-            <svg className="w-6 h-6 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
-            </svg>
-            {/* Badge con número de reportes */}
-            <div className="absolute -top-2 -right-2 bg-[#0C5BEF] text-white rounded-full min-w-6 h-6 px-1.5 flex items-center justify-center">
-              <span className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[10px]">
-                {reportsInQueue}
-              </span>
+      {/* Indicador minimizado de descarga - Google Drive style */}
+      {isDownloading && !isDrawerOpen && isDownloadMinimized && !downloadComplete && (
+        <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50">
+          {downloadComplete ? (
+            // Versión simplificada cuando está completado
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                  </svg>
+                </div>
+                <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
+                  Descarga completada
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsDownloadMinimized(false)}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                  title="Expandir"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M18 15l-6-6-6 6"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={handleCloseDownload}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                  title="Cerrar"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
             </div>
-            {/* Animación de descarga */}
-            {!downloadComplete && (
-              <div className="absolute inset-0 rounded-full border-2 border-[#0C5BEF] opacity-50 animate-ping" />
-            )}
-          </div>
-        </button>
+          ) : (
+            // Versión con progreso
+            <>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[#D0D2D5]">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <svg className="w-5 h-5 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+                    </svg>
+                    <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
+                      Generando reportes masivos
+                    </h3>
+                  </div>
+                  {reportsInQueue > 0 && (
+                    <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs ml-7">
+                      {reportsInQueue} {reportsInQueue === 1 ? 'reporte' : 'reportes'} en cola
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      setIsDownloadMinimized(false);
+                    }}
+                    className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                    title="Expandir"
+                  >
+                    <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M18 15l-6-6-6 6"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleCloseDownload}
+                    className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                    title="Cerrar"
+                  >
+                    <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       )}
 
       {/* Modal de confirmación para cancelar descarga */}
-      {showCancelConfirmation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+      {showCancelConfirmation && (() => {
+        console.log('MODAL RENDERED - showCancelConfirmation:', showCancelConfirmation);
+        return (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
+          <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl border-0">
             <div className="flex gap-3 mb-4">
-              <div className="bg-[#FDEAEA] rounded-full p-3 flex-shrink-0">
-                <svg className="w-6 h-6 text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+              <div className="bg-[#FDEAEA] rounded-full p-2 flex-shrink-0">
+                <svg className="w-5 h-5 text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
               </div>
               <div className="flex-1">
                 <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base mb-1">
-                  ¿Cancelar descarga?
+                  ¿Detener descarga?
                 </h3>
                 <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-sm">
-                  Si cancelas, los reportes en progreso no se completarán. ¿Deseas continuar?
+                  Si te detienes ahora, los reportes en progreso no se guardarán.
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleKeepDownloading}
-                className="flex-1 bg-white text-[#303A47] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                className="flex-1 bg-white text-[#303A47] px-3 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-xs border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors whitespace-nowrap"
               >
-                Continuar descargando
+                Seguir descargando
               </button>
               <button
                 onClick={handleConfirmCancel}
-                className="flex-1 bg-[#D92D20] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#BA2318] transition-colors"
+                className="flex-1 bg-[#D92D20] text-white px-3 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-xs hover:bg-[#BA2318] transition-colors whitespace-nowrap"
               >
-                Cancelar
+                Detener descarga
               </button>
             </div>
           </div>
         </div>
-      )}
+      );
+      })()}
 
     </div>
   );
