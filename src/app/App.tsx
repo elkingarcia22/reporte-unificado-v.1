@@ -255,56 +255,8 @@ export default function App() {
     setShowCancelConfirmation(false);
   };
 
-  const handleClosePdfViewer = async () => {
-    console.log('🔴 handleClosePdfViewer called');
-    try {
-      // Capturar el contenido del PDF
-      const element = document.querySelector('.pdf-viewer-wrapper');
-      console.log('📄 PDF element found:', !!element);
-      if (element) {
-        // Convertir a canvas
-        const canvas = await html2canvas(element as HTMLElement, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff'
-        });
-
-        // Crear PDF
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pageWidth - 20;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 10;
-
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight - 20;
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight + 10;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight - 20;
-        }
-
-        // Abrir en nueva pestaña
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
-      }
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-
+  const handleClosePdfViewer = () => {
+    console.log('✅ Cerrando visualizador de PDF');
     // Cerrar visualizador y mostrar estado de descarga completada
     setShowPdfViewer(false);
     setIsDrawerOpen(true);
@@ -335,7 +287,7 @@ export default function App() {
         }}
       >
         <div
-          className="h-[95vh] max-w-[90vw] overflow-y-auto overflow-x-auto pdf-viewer-wrapper relative bg-[#2d2d2d] rounded"
+          className="h-[98vh] w-[98vw] overflow-y-auto overflow-x-auto pdf-viewer-wrapper relative bg-[#2d2d2d] rounded flex items-center justify-center"
           onClick={(e) => {
             console.log('📄 Click on PDF wrapper');
             e.stopPropagation();
