@@ -1275,7 +1275,7 @@ export default function App() {
                         </button>
                       </div>
                     </div>
-                  ) : downloadComplete ? (
+                  ) : downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
                     <>
                       <button
                         onClick={handleOpenFolder}
@@ -1897,7 +1897,7 @@ export default function App() {
           </div>
 
           {/* Footer Actions */}
-          {downloadComplete ? (
+          {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
             <div className="px-4 py-3 border-t border-[#D0D2D5] flex gap-2 flex-shrink-0">
               <button onClick={handleOpenFolder} className="flex-1 bg-[#0C5BEF] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#0A4BC7] transition-colors">
                 Abrir carpeta
