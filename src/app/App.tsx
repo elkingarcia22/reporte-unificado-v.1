@@ -321,20 +321,11 @@ export default function App() {
   // Si está mostrando el visualizador de PDF, mostrar solo eso
   if (showPdfViewer) {
     return (
-      <div className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex items-center justify-center" onClick={handleClosePdfViewer}>
+      <div className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex flex-col" onClick={handleClosePdfViewer}>
         <div
-          className="h-full w-full overflow-y-auto overflow-x-hidden pdf-viewer-wrapper relative"
+          className="h-full w-full overflow-y-auto overflow-x-auto pdf-viewer-wrapper relative flex justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            onClick={handleClosePdfViewer}
-            className="fixed top-6 right-6 z-50 bg-white hover:bg-gray-100 rounded-full p-2 transition-colors"
-            title="Cerrar"
-          >
-            <svg className="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
           <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
         </div>
       </div>
