@@ -1911,8 +1911,8 @@ export default function App() {
       {/* Indicador minimizado de descarga - Google Drive style */}
       {isDownloading && !isDrawerOpen && isDownloadMinimized && (!downloadComplete || downloadingReports.some(r => r.status === 'error')) && (
         <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50">
-          {downloadComplete ? (
-            // Versión simplificada cuando está completado
+          {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
+            // Versión completada sin errores
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
@@ -1922,6 +1922,40 @@ export default function App() {
                 </div>
                 <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
                   Descarga completada
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsDownloadMinimized(false)}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                  title="Expandir"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M18 15l-6-6-6 6"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={handleCloseDownload}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                  title="Cerrar"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ) : downloadComplete && downloadingReports.some(r => r.status === 'error') ? (
+            // Versión con errores
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#D92D20] flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </div>
+                <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
+                  La descarga falló
                 </p>
               </div>
               <div className="flex items-center gap-1">
