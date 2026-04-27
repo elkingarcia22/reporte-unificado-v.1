@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef from '../imports/VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef/VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef';
 
 export default function App() {
@@ -253,8 +255,67 @@ export default function App() {
     setShowCancelConfirmation(false);
   };
 
-  const handleClosePdfViewer = () => {
+  const handleClosePdfViewer = async () => {
+    try {
+      // Capturar el contenido del PDF
+      const element = document.querySelector('.pdf-viewer-wrapper');
+      if (element) {
+        // Convertir a canvas
+        const canvas = await html2canvas(element as HTMLElement, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+
+        // Crear PDF
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth - 20;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 10;
+
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight - 20;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight + 10;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight - 20;
+        }
+
+        // Abrir en nueva pestaña
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+
+    // Cerrar visualizador y mostrar estado de descarga completada
     setShowPdfViewer(false);
+    setIsDrawerOpen(true);
+    setIsDownloading(true);
+    setDownloadComplete(true);
+    setDownloadingReports([
+      {
+        id: Date.now(),
+        name: 'Reporte_Ejecutivo_Individual.pdf',
+        progress: 100,
+        status: 'completed'
+      }
+    ]);
   };
 
   // Si está mostrando el visualizador de PDF, mostrar solo eso
@@ -262,7 +323,7 @@ export default function App() {
     return (
       <div className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex items-center justify-center" onClick={handleClosePdfViewer}>
         <div
-          className="h-full w-full max-w-[1240px] overflow-y-auto overflow-x-hidden pdf-viewer-wrapper relative"
+          className="h-full w-full overflow-y-auto overflow-x-hidden pdf-viewer-wrapper relative"
           onClick={(e) => e.stopPropagation()}
         >
           <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />

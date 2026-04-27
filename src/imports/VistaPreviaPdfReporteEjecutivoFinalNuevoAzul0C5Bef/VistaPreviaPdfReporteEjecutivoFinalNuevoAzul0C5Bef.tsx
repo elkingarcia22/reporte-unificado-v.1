@@ -2352,8 +2352,8 @@ function Heading9() {
   return (
     <div className="content-stretch flex gap-[8px] items-center relative shrink-0 w-full" data-name="Heading 2">
       <Container63 />
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[28px] justify-center leading-[0] relative shrink-0 text-[#141b2c] text-[20px] w-[406.63px]">
-        <p className="leading-[28px]">Propuesta de Plan de Desarrollo Individual</p>
+      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[28px] justify-center leading-[0] relative shrink-0 text-[#141b2c] text-[20px] w-full">
+        <p className="leading-[28px] whitespace-nowrap">Propuesta de Plan de Desarrollo Individual</p>
       </div>
     </div>
   );
@@ -2463,7 +2463,7 @@ function PdfMainViewport() {
 
 export default function VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef() {
   return (
-    <div className="content-stretch flex flex-col isolate items-start relative size-full" style={{ backgroundImage: "linear-gradient(90deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)" }} data-name="Vista Previa PDF - Reporte Ejecutivo Final (Nuevo Azul #0C5BEF)">
+    <div className="content-stretch flex flex-col isolate items-center justify-center relative size-full" style={{ backgroundImage: "linear-gradient(90deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)" }} data-name="Vista Previa PDF - Reporte Ejecutivo Final (Nuevo Azul #0C5BEF)">
       <HeaderPdfViewerToolbar />
       <PdfMainViewport />
     </div>
