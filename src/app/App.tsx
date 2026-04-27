@@ -27,7 +27,7 @@ export default function App() {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [showAnalysisList, setShowAnalysisList] = useState(true);
-  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number }>>([]);
+  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number; isIndividual?: boolean }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [showDrawerCancelAllConfirm, setShowDrawerCancelAllConfirm] = useState(false);
   const [cancelConfirmReportId, setCancelConfirmReportId] = useState<number | null>(null);
@@ -234,10 +234,11 @@ export default function App() {
       setDownloadingReports([
         {
           id: Date.now(),
-          name: 'Reporte_Ejecutivo_Individual.pdf',
+          name: selectedColaborador,
           progress: 100,
           status: 'completed',
-          collaboratorCount: 1
+          collaboratorCount: 1,
+          isIndividual: true
         }
       ]);
     }
@@ -449,10 +450,11 @@ export default function App() {
     setDownloadingReports([
       {
         id: Date.now(),
-        name: 'Reporte_Ejecutivo_Individual.pdf',
+        name: selectedColaborador,
         progress: 100,
         status: 'completed',
-        collaboratorCount: 1
+        collaboratorCount: 1,
+        isIndividual: true
       }
     ]);
   };
@@ -1125,7 +1127,7 @@ export default function App() {
                 {/* Encabezado con info */}
                 <div className="mb-4">
                   <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base">
-                    {downloadComplete ? 'Descargas completadas' : 'Descargando reportes'}
+                    Descargas
                   </h3>
                 </div>
 
@@ -1221,10 +1223,15 @@ export default function App() {
                                 />
                               </div>
                               <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                                {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue.length > 0 ? alcanceFieldValue.join(', ') : 'Seleccionado'}`}
-                              </p>
-                              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mt-1">
-                                {report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
+                                {!report.isIndividual ? (
+                                  <>
+                                    {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue.length > 0 ? alcanceFieldValue.join(', ') : 'Seleccionado'}`}
+                                    {' - '}
+                                    {report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
+                                  </>
+                                ) : (
+                                  `${report.collaboratorCount} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`
+                                )}
                               </p>
                             </>
                           )}
@@ -1239,16 +1246,7 @@ export default function App() {
                 </div>
 
                 {/* Mensaje de estado */}
-                {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
-                  <div className="bg-[#F0F9F7] border border-[#10B981] rounded-lg p-3 flex gap-2 mb-4">
-                    <svg className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                    </svg>
-                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#065F46]">
-                      Reportes generados y descargados. Listos para visualizar.
-                    </p>
-                  </div>
-                ) : !downloadComplete ? (
+                {!downloadComplete ? (
                   <div className="bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2 mb-4">
                     <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -1257,7 +1255,16 @@ export default function App() {
                       La descarga está en progreso. Puedes seguir generando reportes o minimizar esta ventana.
                     </p>
                   </div>
-                ) : null}
+                ) : downloadingReports.some(r => r.status === 'error') ? null : (
+                  <div className="bg-[#F0F9F7] border border-[#10B981] rounded-lg p-3 flex gap-2 mb-4">
+                    <svg className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#065F46]">
+                      Reportes generados y descargados. Listos para visualizar.
+                    </p>
+                  </div>
+                )}
 
                 {/* Opciones de acción */}
                 <div className="space-y-3">
@@ -1795,7 +1802,7 @@ export default function App() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
-                  {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? 'Descargas completadas' : 'Descargando reportes'}
+                  Descargas
                 </h3>
               </div>
               {!downloadComplete && downloadingReports.length > 0 && (
