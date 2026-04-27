@@ -256,9 +256,11 @@ export default function App() {
   };
 
   const handleClosePdfViewer = async () => {
+    console.log('🔴 handleClosePdfViewer called');
     try {
       // Capturar el contenido del PDF
       const element = document.querySelector('.pdf-viewer-wrapper');
+      console.log('📄 PDF element found:', !!element);
       if (element) {
         // Convertir a canvas
         const canvas = await html2canvas(element as HTMLElement, {
@@ -320,11 +322,24 @@ export default function App() {
 
   // Si está mostrando el visualizador de PDF, mostrar solo eso
   if (showPdfViewer) {
+    console.log('🎯 PDF Viewer is showing');
     return (
-      <div className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex flex-col" onClick={handleClosePdfViewer}>
+      <div
+        className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex items-center justify-center"
+        onClick={(e) => {
+          console.log('🖱️ Click on outer background');
+          // Solo cerrar si hace click fuera del PDF
+          if (e.target === e.currentTarget) {
+            handleClosePdfViewer();
+          }
+        }}
+      >
         <div
-          className="h-full w-full overflow-y-auto overflow-x-auto pdf-viewer-wrapper relative flex justify-center"
-          onClick={(e) => e.stopPropagation()}
+          className="h-[95vh] max-w-[90vw] overflow-y-auto overflow-x-auto pdf-viewer-wrapper relative bg-[#2d2d2d] rounded"
+          onClick={(e) => {
+            console.log('📄 Click on PDF wrapper');
+            e.stopPropagation();
+          }}
         >
           <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
         </div>
