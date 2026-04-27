@@ -1128,39 +1128,7 @@ export default function App() {
                     <div className="space-y-3">
                       {downloadingReports.map((report) => (
                         <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
-                          {report.status === 'error' ? (
-                            /* Error state */
-                            <div className="bg-[#FEF3F2] border border-[#FED4D1] rounded-lg p-3">
-                              <div className="flex items-start gap-2">
-                                <svg className="w-4 h-4 text-[#D92D20] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                                </svg>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] font-semibold">Error al descargar</p>
-                                  <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mt-0.5 truncate">No se pudo completar "{report.name}".</p>
-                                  <div className="flex gap-3 mt-2">
-                                    <button
-                                      onClick={() => handleRetryReport(report.id)}
-                                      className="text-xs text-[#0C5BEF] hover:underline font-['Noto_Sans:Regular',sans-serif]"
-                                    >
-                                      Reintentar
-                                    </button>
-                                    <button
-                                      onClick={() => setDownloadingReports(prev => {
-                                        const updated = prev.filter(r => r.id !== report.id);
-                                        if (updated.length === 0) { setIsDownloading(false); setDownloadComplete(false); setReportsInQueue(0); setShowReportOptions(false); }
-                                        else if (updated.every(r => r.status === 'completed' || r.status === 'error')) setDownloadComplete(true);
-                                        return updated;
-                                      })}
-                                      className="text-xs text-[#5C646F] hover:underline font-['Noto_Sans:Regular',sans-serif]"
-                                    >
-                                      Omitir
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : cancelConfirmReportId === report.id ? (
+                          {cancelConfirmReportId === report.id ? (
                             /* Confirmación inline por reporte */
                             <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-3">
                               <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-3">
@@ -1191,6 +1159,12 @@ export default function App() {
                                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                                       </svg>
                                     </div>
+                                  ) : report.status === 'error' ? (
+                                    <div className="w-5 h-5 rounded-full bg-[#D92D20] flex items-center justify-center flex-shrink-0">
+                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                      </svg>
+                                    </div>
                                   ) : (
                                     <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
@@ -1205,7 +1179,7 @@ export default function App() {
                                   <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
                                     {report.progress}%
                                   </p>
-                                  {report.status !== 'completed' && (
+                                  {report.status === 'downloading' && (
                                     <button
                                       onClick={() => setCancelConfirmReportId(report.id)}
                                       className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
@@ -1831,85 +1805,57 @@ export default function App() {
               <div className="space-y-3">
                 {downloadingReports.map((report) => (
                   <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
-                    {report.status === 'error' ? (
-                      /* Error state */
-                      <div className="bg-[#FEF3F2] border border-[#FED4D1] rounded-lg p-3">
-                        <div className="flex items-start gap-2">
-                          <svg className="w-4 h-4 text-[#D92D20] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                          </svg>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] font-semibold">Error al descargar</p>
-                            <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mt-0.5 truncate">No se pudo completar "{report.name}".</p>
-                            <div className="flex gap-3 mt-2">
-                              <button
-                                onClick={() => handleRetryReport(report.id)}
-                                className="text-xs text-[#0C5BEF] hover:underline font-['Noto_Sans:Regular',sans-serif]"
-                              >
-                                Reintentar
-                              </button>
-                              <button
-                                onClick={() => setDownloadingReports(prev => {
-                                  const updated = prev.filter(r => r.id !== report.id);
-                                  if (updated.length === 0) { setIsDownloading(false); setDownloadComplete(false); setReportsInQueue(0); }
-                                  else if (updated.every(r => r.status === 'completed' || r.status === 'error')) setDownloadComplete(true);
-                                  return updated;
-                                })}
-                                className="text-xs text-[#5C646F] hover:underline font-['Noto_Sans:Regular',sans-serif]"
-                              >
-                                Omitir
-                              </button>
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {report.status === 'completed' ? (
+                            <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                              </svg>
                             </div>
-                          </div>
+                          ) : report.status === 'error' ? (
+                            <div className="w-5 h-5 rounded-full bg-[#D92D20] flex items-center justify-center flex-shrink-0">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                              </svg>
+                            </div>
+                          ) : (
+                            <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                              <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                          )}
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                            {report.name}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                          <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
+                            {report.progress}%
+                          </p>
+                          {report.status === 'downloading' && (
+                            <button
+                              onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
+                              className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
+                              title="Detener descarga"
+                            >
+                              <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 6h12v12H6z"/>
+                              </svg>
+                            </button>
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {report.status === 'completed' ? (
-                              <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                                </svg>
-                              </div>
-                            ) : (
-                              <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                                <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                              </svg>
-                            )}
-                            <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                              {report.name}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                            <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
-                              {report.progress}%
-                            </p>
-                            {report.status === 'downloading' && (
-                              <button
-                                onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
-                                className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
-                                title="Detener descarga"
-                              >
-                                <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M6 6h12v12H6z"/>
-                                </svg>
-                              </button>
-                            )}
-                          </div>
+                      {report.status !== 'completed' && (
+                        <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden ml-7" style={{ width: 'calc(100% - 1.75rem)' }}>
+                          <div
+                            className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                            style={{ width: `${report.progress}%` }}
+                          />
                         </div>
-                        {report.status !== 'completed' && (
-                          <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden ml-7" style={{ width: 'calc(100% - 1.75rem)' }}>
-                            <div
-                              className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                              style={{ width: `${report.progress}%` }}
-                            />
-                          </div>
-                        )}
-                      </>
-                    )}
+                      )}
+                    </>
                   </div>
                 ))}
               </div>
