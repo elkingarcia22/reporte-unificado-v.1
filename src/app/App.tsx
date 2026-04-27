@@ -1601,7 +1601,10 @@ export default function App() {
                           </svg>
                           <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
                             Se generarán reportes para los {getColaboradoresCount(alcance, Array.isArray(alcanceFieldValue) ? alcanceFieldValue[0] : alcanceFieldValue)} colaboradores
-                            {alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad'} seleccionado dentro del análisis actual.
+                            {alcanceFieldValue.length === 1
+                              ? (alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad')
+                              : (alcance === 'Área' ? ' de las áreas' : alcance === 'Líder' ? ' bajo estos líderes' : alcance === 'País' ? ' de los países' : ' de las ciudades')
+                            } seleccionado{alcanceFieldValue.length > 1 ? 's' : ''} dentro del análisis actual.
                           </p>
                         </div>
                       )}
