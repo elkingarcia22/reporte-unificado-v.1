@@ -1229,7 +1229,7 @@ export default function App() {
                 </div>
 
                 {/* Mensaje de estado */}
-                {downloadComplete ? (
+                {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
                   <div className="bg-[#F0F9F7] border border-[#10B981] rounded-lg p-3 flex gap-2 mb-4">
                     <svg className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
@@ -1238,7 +1238,7 @@ export default function App() {
                       Reportes generados y descargados. Listos para visualizar.
                     </p>
                   </div>
-                ) : (
+                ) : !downloadComplete ? (
                   <div className="bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2 mb-4">
                     <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -1247,7 +1247,7 @@ export default function App() {
                       La descarga está en progreso. Puedes seguir generando reportes o minimizar esta ventana.
                     </p>
                   </div>
-                )}
+                ) : null}
 
                 {/* Opciones de acción */}
                 <div className="space-y-3">
