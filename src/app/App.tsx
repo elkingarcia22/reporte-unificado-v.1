@@ -596,19 +596,38 @@ export default function App() {
 
           {/* Grupo de botones de acción */}
           <div className="flex gap-2 items-center">
-            {/* Botón Descargar con dropdown */}
+            {/* Botón Generar reporte unificado */}
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="bg-[#0C5BEF] flex items-center px-4 py-2 rounded-[5px] shrink-0 hover:bg-[#0A4BC7] transition-colors cursor-pointer"
+            >
+              <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                  <p className="leading-6">Generar reporte unificado</p>
+                </div>
+              </div>
+            </button>
+
+            {/* Botón Descargar con label y dropdown */}
             <div className="relative" ref={downloadRef}>
               <button
                 onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-                className="bg-white flex items-center gap-1 px-3 py-2 rounded-[5px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
-                title="Descargar"
+                className="bg-white flex items-center px-3 py-2 rounded-[5px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
               >
-                <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
-                </svg>
-                <svg className="w-3 h-3 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M7 10l5 5 5-5z"/>
-                </svg>
+                <div className="flex gap-2.5 items-center text-[#5C646F] text-base whitespace-nowrap">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+                  </svg>
+                  <div className="font-['Helvetica_Now_Text_:Regular',sans-serif]">
+                    <p className="leading-6">Descargar</p>
+                  </div>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </div>
               </button>
 
               {/* Dropdown menu */}
@@ -674,21 +693,6 @@ export default function App() {
               <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#D92D20] transition-colors" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
               </svg>
-            </button>
-
-            {/* Botón Generar reporte unificado */}
-            <button
-              onClick={() => setIsDrawerOpen(true)}
-              className="bg-[#0C5BEF] flex items-center px-4 py-2 rounded-[5px] shrink-0 hover:bg-[#0A4BC7] transition-colors cursor-pointer"
-            >
-              <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-                </svg>
-                <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                  <p className="leading-6">Generar reporte unificado</p>
-                </div>
-              </div>
             </button>
           </div>
         </div>

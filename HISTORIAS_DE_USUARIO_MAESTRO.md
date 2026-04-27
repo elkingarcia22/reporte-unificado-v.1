@@ -28,7 +28,15 @@
   - **Análisis Q2 2025** (Happy Path - Sin errores)
   - **Análisis de Talento Semestre 2 2024** (Demo de Errores)
 
-#### 2. **Pantalla de Generación de Reportes**
+#### 2. **Vista de la Matriz de Talento**
+- Visualización de la matriz 9-box
+- Acciones principales en la cabecera (orden de izquierda a derecha):
+  1. **Generar reporte unificado** (Botón primario, azul)
+  2. **Descargar** (Botón secundario, blanco, con etiqueta y menú dropdown)
+  3. **Editar** (Icono de edición)
+  4. **Eliminar** (Icono de eliminación)
+
+#### 3. **Pantalla de Generación de Reportes (Drawer)**
 - Formulario de entrada para reportes
 - Vista de descarga en progreso
 - Gestión de reportes descargados
