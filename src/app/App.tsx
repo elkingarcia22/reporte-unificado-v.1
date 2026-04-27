@@ -194,8 +194,8 @@ export default function App() {
 
     setIsGeneratingPdf(false);
 
-    // Simular fallo ocasional
-    const generateFailed = isErrorDemoMode && Math.random() < 0.3;
+    // Simular fallo: reportes individuales siempre fallan en modo demo, masivos 30%
+    const generateFailed = isErrorDemoMode && (reportType === 'Individual' || Math.random() < 0.3);
     if (generateFailed) {
       setErrorNotification({
         title: reportType === 'Individual' ? 'No pudimos generar tu reporte' : 'Error al iniciar la generación masiva',
