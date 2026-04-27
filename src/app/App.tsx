@@ -28,6 +28,10 @@ export default function App() {
   const [isCancelled, setIsCancelled] = useState(false);
   const [showAnalysisList, setShowAnalysisList] = useState(false);
   const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' }>>([]);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [showDrawerCancelAllConfirm, setShowDrawerCancelAllConfirm] = useState(false);
+  const [cancelConfirmReportId, setCancelConfirmReportId] = useState<number | null>(null);
+  const [pendingCancelReportId, setPendingCancelReportId] = useState<number | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -50,16 +54,16 @@ export default function App() {
   }, []);
 
   const colaboradores = [
-    { id: 1, name: 'Adam Andres Abril Acebes', initials: 'AA', area: 'Tecnología', lider: 'Juan Pérez', pais: 'México' },
-    { id: 2, name: 'Andres Camilo Torres', initials: 'AT', area: 'Ventas', lider: 'María González', pais: 'Colombia' },
-    { id: 3, name: 'Bayron Jesid Garcia', initials: 'BG', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Colombia' },
-    { id: 4, name: 'Estefanía Rojas Acosta', initials: 'ER', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina' },
-    { id: 5, name: 'Elkin Garcia Salazar', initials: 'EG', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Colombia' },
-    { id: 6, name: 'María González López', initials: 'MG', area: 'Recursos Humanos', lider: 'Ana Martínez', pais: 'Chile' },
-    { id: 7, name: 'Carlos Martínez Ruiz', initials: 'CM', area: 'Operaciones', lider: 'Juan Pérez', pais: 'Perú' },
-    { id: 8, name: 'Ana Fernández Castro', initials: 'AF', area: 'Ventas', lider: 'María González', pais: 'México' },
-    { id: 9, name: 'Luis Ramírez Pérez', initials: 'LR', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina' },
-    { id: 10, name: 'Sofia Hernández Vega', initials: 'SH', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Chile' },
+    { id: 1, name: 'Adam Andres Abril Acebes', initials: 'AA', area: 'Tecnología', lider: 'Juan Pérez', pais: 'México', ciudad: 'Ciudad de México' },
+    { id: 2, name: 'Andres Camilo Torres', initials: 'AT', area: 'Ventas', lider: 'María González', pais: 'Colombia', ciudad: 'Bogotá' },
+    { id: 3, name: 'Bayron Jesid Garcia', initials: 'BG', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Colombia', ciudad: 'Medellín' },
+    { id: 4, name: 'Estefanía Rojas Acosta', initials: 'ER', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina', ciudad: 'Buenos Aires' },
+    { id: 5, name: 'Elkin Garcia Salazar', initials: 'EG', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Colombia', ciudad: 'Bogotá' },
+    { id: 6, name: 'María González López', initials: 'MG', area: 'Recursos Humanos', lider: 'Ana Martínez', pais: 'Chile', ciudad: 'Santiago' },
+    { id: 7, name: 'Carlos Martínez Ruiz', initials: 'CM', area: 'Operaciones', lider: 'Juan Pérez', pais: 'Perú', ciudad: 'Lima' },
+    { id: 8, name: 'Ana Fernández Castro', initials: 'AF', area: 'Ventas', lider: 'María González', pais: 'México', ciudad: 'Guadalajara' },
+    { id: 9, name: 'Luis Ramírez Pérez', initials: 'LR', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina', ciudad: 'Córdoba' },
+    { id: 10, name: 'Sofia Hernández Vega', initials: 'SH', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Chile', ciudad: 'Valparaíso' },
   ];
 
   // Función para contar colaboradores según el alcance y valor seleccionado
@@ -75,6 +79,9 @@ export default function App() {
     }
     if (alcanceType === 'País') {
       return colaboradores.filter(c => c.pais === fieldValue).length;
+    }
+    if (alcanceType === 'Ciudad') {
+      return colaboradores.filter(c => c.ciudad === fieldValue).length;
     }
     return 0;
   };
@@ -111,6 +118,13 @@ export default function App() {
 
   const handleContinueGenerating = () => {
     setShowReportOptions(false);
+    // Solo resetear estado de descarga si ya completó (no mientras hay descargas en progreso)
+    if (downloadComplete) {
+      setDownloadComplete(false);
+      setIsDownloading(false);
+      setDownloadingReports([]);
+      setIsDownloadMinimized(false);
+    }
     // Resetear contador a 1 para nueva generación (no incrementar)
     setReportsInQueue(1);
     // Resetear solo los campos del formulario pero mantener el drawer abierto
@@ -196,6 +210,7 @@ export default function App() {
   const startMassiveDownload = () => {
     setIsDownloading(true);
     setIsDownloadMinimized(false);
+    setIsCancelled(false);
 
     const reportId = Date.now();
     const reportName = `Reporte_Masivo_${reportId}.zip`;
@@ -252,15 +267,52 @@ export default function App() {
   };
 
   const handleConfirmCancel = () => {
-    console.log('handleConfirmCancel called');
-    setIsCancelled(true);
-    setIsDownloading(false);
-    setDownloadProgress(0);
-    setDownloadComplete(false);
-    setIsDownloadMinimized(false);
-    setReportsInQueue(0);
-    setDownloadingReports([]);
+    console.log('handleConfirmCancel called, pendingCancelReportId:', pendingCancelReportId);
+    if (pendingCancelReportId !== null) {
+      // Cancelar solo el reporte individual
+      setDownloadingReports((prev) => {
+        const updated = prev.filter((r) => r.id !== pendingCancelReportId);
+        if (updated.length === 0) {
+          setIsDownloading(false);
+          setDownloadComplete(false);
+          setReportsInQueue(0);
+          setIsDownloadMinimized(false);
+        } else {
+          const allCompleted = updated.every((r) => r.status === 'completed');
+          if (allCompleted) setDownloadComplete(true);
+        }
+        return updated;
+      });
+      setPendingCancelReportId(null);
+    } else {
+      // Cancelar todas las descargas
+      setIsCancelled(true);
+      setIsDownloading(false);
+      setDownloadProgress(0);
+      setDownloadComplete(false);
+      setIsDownloadMinimized(false);
+      setReportsInQueue(0);
+      setDownloadingReports([]);
+    }
     setShowCancelConfirmation(false);
+    setShowDrawerCancelAllConfirm(false);
+  };
+
+  const handleCancelSingleReport = (id: number) => {
+    setDownloadingReports((prev) => {
+      const updated = prev.filter((r) => r.id !== id);
+      if (updated.length === 0) {
+        setIsDownloading(false);
+        setDownloadComplete(false);
+        setReportsInQueue(0);
+        setShowReportOptions(false);
+      } else {
+        const allCompleted = updated.every((r) => r.status === 'completed');
+        if (allCompleted) setDownloadComplete(true);
+      }
+      return updated;
+    });
+    setCancelConfirmReportId(null);
   };
 
   const handleKeepDownloading = () => {
@@ -288,37 +340,22 @@ export default function App() {
   // Si estamos en modo preview del PDF
   if (isPdfPreviewMode) {
     return (
-      <div className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex items-center justify-center">
-        <div className="h-[98vh] w-[98vw] overflow-y-auto overflow-x-auto relative bg-[#2d2d2d] rounded flex items-center justify-center">
-          <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
-        </div>
+      <div className="h-screen w-screen overflow-hidden">
+        <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
       </div>
     );
   }
 
   // Si está mostrando el visualizador de PDF, mostrar solo eso
   if (showPdfViewer) {
-    console.log('🎯 PDF Viewer is showing');
     return (
       <div
-        className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex items-center justify-center"
+        className="h-screen w-screen overflow-hidden"
         onClick={(e) => {
-          console.log('🖱️ Click on outer background');
-          // Solo cerrar si hace click fuera del PDF
-          if (e.target === e.currentTarget) {
-            handleClosePdfViewer();
-          }
+          if (e.target === e.currentTarget) handleClosePdfViewer();
         }}
       >
-        <div
-          className="h-[98vh] w-[98vw] overflow-y-auto overflow-x-auto pdf-viewer-wrapper relative bg-[#2d2d2d] rounded flex items-center justify-center"
-          onClick={(e) => {
-            console.log('📄 Click on PDF wrapper');
-            e.stopPropagation();
-          }}
-        >
-          <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
-        </div>
+        <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
       </div>
     );
   }
@@ -906,20 +943,54 @@ export default function App() {
             className="fixed top-0 right-0 h-full w-[440px] bg-white shadow-2xl z-[101] flex flex-col animate-[slideInRight_0.3s_ease-in-out]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[#D0D2D5]">
-              <div className="flex-1">
-                <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl">
+            <div className="px-6 py-5 border-b border-[#D0D2D5]">
+              <div className="flex items-center justify-between">
+                <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl flex-1">
                   {showReportOptions ? 'Reporte en cola' : 'Crear Reporte Unificado'}
                 </h2>
+                <button
+                  onClick={() => handleCloseDrawer()}
+                  className="text-[#303A47] hover:text-[#0C5BEF] transition-colors ml-3"
+                >
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => handleCloseDrawer()}
-                className="text-[#303A47] hover:text-[#0C5BEF] transition-colors"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
+
+              {/* Progreso de descarga en el header - solo cuando hay descargas activas y estamos en vista de formulario */}
+              {isDownloading && !downloadComplete && !showReportOptions && downloadingReports.length > 0 && (() => {
+                const avgProgress = Math.round(downloadingReports.reduce((sum, r) => sum + r.progress, 0) / downloadingReports.length);
+                const inProgress = downloadingReports.filter(r => r.status !== 'completed').length;
+                return (
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                        </svg>
+                        <span className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                          {inProgress > 0 ? `${inProgress} elemento${inProgress > 1 ? 's' : ''} en cola` : 'Finalizando...'}
+                        </span>
+                      </div>
+                      <span className="font-['Noto_Sans:Bold',sans-serif] text-xs text-[#0C5BEF]">{avgProgress}%</span>
+                    </div>
+                    <div className="w-full bg-[#E7E8EA] rounded-full h-1 overflow-hidden">
+                      <div
+                        className="bg-[#0C5BEF] h-full transition-all duration-300 rounded-full"
+                        style={{ width: `${avgProgress}%` }}
+                      />
+                    </div>
+                    <button
+                      onClick={() => setShowReportOptions(true)}
+                      className="text-xs text-[#0C5BEF] hover:underline mt-1.5"
+                    >
+                      Ver detalle →
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Content */}
@@ -939,38 +1010,76 @@ export default function App() {
                     <div className="space-y-3">
                       {downloadingReports.map((report) => (
                         <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              {report.status === 'completed' ? (
-                                <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                                  </svg>
-                                </div>
-                              ) : (
-                                <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                              )}
-                              <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                                {report.name}
+                          {cancelConfirmReportId === report.id ? (
+                            /* Confirmación inline por reporte */
+                            <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-3">
+                              <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-3">
+                                ¿Detener la descarga de <span className="font-['Noto_Sans:Bold',sans-serif]">{report.name}</span>?
                               </p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleCancelSingleReport(report.id)}
+                                  className="flex-1 bg-[#D92D20] text-white px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#B42318] transition-colors"
+                                >
+                                  Sí, detener
+                                </button>
+                                <button
+                                  onClick={() => setCancelConfirmReportId(null)}
+                                  className="flex-1 bg-white text-[#303A47] px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                                >
+                                  No, continuar
+                                </button>
+                              </div>
                             </div>
-                            <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF] ml-2">
-                              {report.progress}%
-                            </p>
-                          </div>
-                          {/* Barra de progreso */}
-                          <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden mb-2">
-                            <div
-                              className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                              style={{ width: `${report.progress}%` }}
-                            />
-                          </div>
-                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                            {alcance === 'Toda la empresa' ? '142 colaboradores' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
-                          </p>
+                          ) : (
+                            <>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {report.status === 'completed' ? (
+                                    <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                      </svg>
+                                    </div>
+                                  ) : (
+                                    <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                  )}
+                                  <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                    {report.name}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                                  <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
+                                    {report.progress}%
+                                  </p>
+                                  {report.status !== 'completed' && (
+                                    <button
+                                      onClick={() => setCancelConfirmReportId(report.id)}
+                                      className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
+                                      title="Detener descarga"
+                                    >
+                                      <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 6h12v12H6z"/>
+                                      </svg>
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              {/* Barra de progreso */}
+                              <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden mb-2">
+                                <div
+                                  className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                                  style={{ width: `${report.progress}%` }}
+                                />
+                              </div>
+                              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                                {alcance === 'Toda la empresa' ? '142 colaboradores' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
+                              </p>
+                            </>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1004,7 +1113,31 @@ export default function App() {
 
                 {/* Opciones de acción */}
                 <div className="space-y-3">
-                  {downloadComplete ? (
+                  {showDrawerCancelAllConfirm ? (
+                    /* Confirmación inline cancelar todo */
+                    <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-4">
+                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-1">
+                        ¿Cancelar todas las descargas en progreso?
+                      </p>
+                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mb-3">
+                        Esta acción no se puede deshacer.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleConfirmCancel}
+                          className="flex-1 bg-[#D92D20] text-white px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm hover:bg-[#B42318] transition-colors"
+                        >
+                          Sí, cancelar todo
+                        </button>
+                        <button
+                          onClick={() => setShowDrawerCancelAllConfirm(false)}
+                          className="flex-1 bg-white text-[#303A47] px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                        >
+                          No, continuar
+                        </button>
+                      </div>
+                    </div>
+                  ) : downloadComplete ? (
                     <>
                       <button
                         className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors flex items-center justify-center gap-2"
@@ -1036,23 +1169,25 @@ export default function App() {
                         Minimizar y continuar
                       </button>
                       <button
-                        onClick={handleCloseDownload}
+                        onClick={() => setShowDrawerCancelAllConfirm(true)}
                         className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                          <path d="M6 6h12v12H6z"/>
                         </svg>
                         Cancelar descarga
                       </button>
                     </>
                   )}
 
-                  <button
-                    onClick={() => handleCloseDrawer()}
-                    className="w-full text-[#5C646F] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm hover:bg-[#F3F3F4] transition-colors"
-                  >
-                    Cerrar
-                  </button>
+                  {!showDrawerCancelAllConfirm && (
+                    <button
+                      onClick={() => handleCloseDrawer()}
+                      className="w-full text-[#5C646F] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm hover:bg-[#F3F3F4] transition-colors"
+                    >
+                      Cerrar
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -1175,28 +1310,42 @@ export default function App() {
                       Configuración de alcance
                     </label>
                     <div className="relative">
-                      <select
-                        value={alcance}
-                        onChange={(e) => {
-                          setAlcance(e.target.value);
-                          setAlcanceFieldValue('');
-                          setShowAlcanceFieldError(false);
-                        }}
-                        className="w-full px-4 py-3 border border-[#D0D2D5] rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] appearance-none bg-white cursor-pointer"
+                      {openDropdown === 'alcance' && (
+                        <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setOpenDropdown(openDropdown === 'alcance' ? null : 'alcance')}
+                        className="w-full px-4 py-3 border border-[#D0D2D5] rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] bg-white flex items-center justify-between hover:border-[#0C5BEF] transition-colors"
                       >
-                        <option value="Toda la empresa">Toda la empresa</option>
-                        <option value="Área">Área</option>
-                        <option value="Líder">Líder</option>
-                        <option value="País">País</option>
-                        <option value="Columna A">Columna A</option>
-                        <option value="Columna B">Columna B</option>
-                      </select>
-                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#303A47] pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M7 10l5 5 5-5z"/>
-                      </svg>
+                        <span>{alcance}</span>
+                        <svg className={`w-4 h-4 text-[#303A47] transition-transform duration-200 ${openDropdown === 'alcance' ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                      </button>
+                      {openDropdown === 'alcance' && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-xl z-50 overflow-hidden">
+                          {['Toda la empresa', 'Área', 'Líder', 'País', 'Ciudad', 'Columna A', 'Columna B'].map(opt => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => { setAlcance(opt); setAlcanceFieldValue(''); setShowAlcanceFieldError(false); setOpenDropdown(null); }}
+                              className={`w-full px-4 py-2.5 text-left font-['Noto_Sans:Regular',sans-serif] text-sm transition-colors flex items-center justify-between ${
+                                alcance === opt ? 'text-[#0C5BEF] bg-[#EEF4FF]' : 'text-[#303A47] hover:bg-[#F3F3F4]'
+                              }`}
+                            >
+                              {opt}
+                              {alcance === opt && (
+                                <svg className="w-4 h-4 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                </svg>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
-                    {/* Info message - Solo para "Toda la empresa" */}
                     {alcance === 'Toda la empresa' && (
                       <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
                         <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -1210,36 +1359,58 @@ export default function App() {
                   </div>
 
                   {/* Campo específico según selección */}
-                  {alcance === 'Área' && (
+                  {(['Área', 'Líder', 'País', 'Ciudad'] as const).includes(alcance as any) && (
                     <div className="mb-6">
                       <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2">
-                        Área
+                        {alcance}
                       </label>
                       <div className="relative">
-                        <select
-                          value={alcanceFieldValue}
-                          onChange={(e) => {
-                            setAlcanceFieldValue(e.target.value);
-                            setShowAlcanceFieldError(false);
-                          }}
-                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] appearance-none bg-white cursor-pointer ${
+                        {openDropdown === 'alcanceField' && (
+                          <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setOpenDropdown(openDropdown === 'alcanceField' ? null : 'alcanceField')}
+                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm bg-white flex items-center justify-between hover:border-[#0C5BEF] transition-colors ${
                             showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
                           }`}
                         >
-                          <option value="">Seleccionar área...</option>
-                          <option value="Tecnología">Tecnología</option>
-                          <option value="Ventas">Ventas</option>
-                          <option value="Marketing">Marketing</option>
-                          <option value="Recursos Humanos">Recursos Humanos</option>
-                          <option value="Operaciones">Operaciones</option>
-                        </select>
-                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#303A47] pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M7 10l5 5 5-5z"/>
-                        </svg>
+                          <span className={alcanceFieldValue ? 'text-[#303A47]' : 'text-[#5C646F]'}>
+                            {alcanceFieldValue || `Seleccionar ${alcance.toLowerCase()}...`}
+                          </span>
+                          <svg className={`w-4 h-4 text-[#303A47] transition-transform duration-200 ${openDropdown === 'alcanceField' ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"/>
+                          </svg>
+                        </button>
+                        {openDropdown === 'alcanceField' && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-xl z-50 overflow-hidden">
+                            {(alcance === 'Área' ? ['Tecnología', 'Ventas', 'Marketing', 'Recursos Humanos', 'Operaciones']
+                              : alcance === 'Líder' ? ['Juan Pérez', 'María González', 'Carlos Rodríguez', 'Ana Martínez']
+                              : alcance === 'País' ? ['México', 'Colombia', 'Argentina', 'Chile', 'Perú']
+                              : ['Bogotá', 'Medellín', 'Ciudad de México', 'Guadalajara', 'Buenos Aires', 'Córdoba', 'Santiago', 'Valparaíso', 'Lima']
+                            ).map(opt => (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => { setAlcanceFieldValue(opt); setShowAlcanceFieldError(false); setOpenDropdown(null); }}
+                                className={`w-full px-4 py-2.5 text-left font-['Noto_Sans:Regular',sans-serif] text-sm transition-colors flex items-center justify-between ${
+                                  alcanceFieldValue === opt ? 'text-[#0C5BEF] bg-[#EEF4FF]' : 'text-[#303A47] hover:bg-[#F3F3F4]'
+                                }`}
+                              >
+                                {opt}
+                                {alcanceFieldValue === opt && (
+                                  <svg className="w-4 h-4 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                  </svg>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       {showAlcanceFieldError && (
                         <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                          Debes seleccionar un área para generar los reportes masivos.
+                          Debes seleccionar {alcance === 'Área' ? 'un área' : alcance === 'Líder' ? 'un líder' : alcance === 'País' ? 'un país' : 'una ciudad'} para generar los reportes masivos.
                         </p>
                       )}
                       {alcanceFieldValue && (
@@ -1248,96 +1419,8 @@ export default function App() {
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                           </svg>
                           <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                            Se generarán reportes para los {getColaboradoresCount('Área', alcanceFieldValue)} colaboradores del área seleccionada.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {alcance === 'Líder' && (
-                    <div className="mb-6">
-                      <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2">
-                        Líder
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={alcanceFieldValue}
-                          onChange={(e) => {
-                            setAlcanceFieldValue(e.target.value);
-                            setShowAlcanceFieldError(false);
-                          }}
-                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] appearance-none bg-white cursor-pointer ${
-                            showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                          }`}
-                        >
-                          <option value="">Seleccionar líder...</option>
-                          <option value="Juan Pérez">Juan Pérez</option>
-                          <option value="María González">María González</option>
-                          <option value="Carlos Rodríguez">Carlos Rodríguez</option>
-                          <option value="Ana Martínez">Ana Martínez</option>
-                        </select>
-                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#303A47] pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M7 10l5 5 5-5z"/>
-                        </svg>
-                      </div>
-                      {showAlcanceFieldError && (
-                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                          Debes seleccionar un líder para generar los reportes masivos.
-                        </p>
-                      )}
-                      {alcanceFieldValue && (
-                        <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
-                          <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                          </svg>
-                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                            Se generarán reportes para los {getColaboradoresCount('Líder', alcanceFieldValue)} colaboradores bajo este líder.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {alcance === 'País' && (
-                    <div className="mb-6">
-                      <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2">
-                        País
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={alcanceFieldValue}
-                          onChange={(e) => {
-                            setAlcanceFieldValue(e.target.value);
-                            setShowAlcanceFieldError(false);
-                          }}
-                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] appearance-none bg-white cursor-pointer ${
-                            showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                          }`}
-                        >
-                          <option value="">Seleccionar país...</option>
-                          <option value="México">México</option>
-                          <option value="Colombia">Colombia</option>
-                          <option value="Argentina">Argentina</option>
-                          <option value="Chile">Chile</option>
-                          <option value="Perú">Perú</option>
-                        </select>
-                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#303A47] pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M7 10l5 5 5-5z"/>
-                        </svg>
-                      </div>
-                      {showAlcanceFieldError && (
-                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                          Debes seleccionar un país para generar los reportes masivos.
-                        </p>
-                      )}
-                      {alcanceFieldValue && (
-                        <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
-                          <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                          </svg>
-                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                            Se generarán reportes para los {getColaboradoresCount('País', alcanceFieldValue)} colaboradores del país seleccionado.
+                            Se generarán reportes para los {getColaboradoresCount(alcance, alcanceFieldValue)} colaboradores
+                            {alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad'} seleccionado.
                           </p>
                         </div>
                       )}
@@ -1353,18 +1436,11 @@ export default function App() {
                         type="text"
                         placeholder="Ingresar valor para Columna A..."
                         value={alcanceFieldValue}
-                        onChange={(e) => {
-                          setAlcanceFieldValue(e.target.value);
-                          setShowAlcanceFieldError(false);
-                        }}
-                        className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                          showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                        }`}
+                        onChange={(e) => { setAlcanceFieldValue(e.target.value); setShowAlcanceFieldError(false); }}
+                        className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'}`}
                       />
                       {showAlcanceFieldError && (
-                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                          Debes ingresar un valor para Columna A para generar los reportes masivos.
-                        </p>
+                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">Debes ingresar un valor para Columna A.</p>
                       )}
                     </div>
                   )}
@@ -1378,18 +1454,11 @@ export default function App() {
                         type="text"
                         placeholder="Ingresar valor para Columna B..."
                         value={alcanceFieldValue}
-                        onChange={(e) => {
-                          setAlcanceFieldValue(e.target.value);
-                          setShowAlcanceFieldError(false);
-                        }}
-                        className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                          showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                        }`}
+                        onChange={(e) => { setAlcanceFieldValue(e.target.value); setShowAlcanceFieldError(false); }}
+                        className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'}`}
                       />
                       {showAlcanceFieldError && (
-                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                          Debes ingresar un valor para Columna B para generar los reportes masivos.
-                        </p>
+                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">Debes ingresar un valor para Columna B.</p>
                       )}
                     </div>
                   )}
@@ -1550,28 +1619,28 @@ export default function App() {
                   {downloadComplete ? 'Descargas completadas' : 'Descargando reportes'}
                 </h3>
               </div>
-              {downloadingReports.length > 0 && (
+              {!downloadComplete && downloadingReports.length > 0 && (
                 <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs ml-7">
-                  {downloadingReports.length} {downloadingReports.length === 1 ? 'reporte' : 'reportes'} en cola
+                  {downloadingReports.filter(r => r.status === 'downloading').length} {downloadingReports.filter(r => r.status === 'downloading').length === 1 ? 'reporte' : 'reportes'} en cola
                 </p>
               )}
             </div>
             <div className="flex items-center gap-1">
+              {!downloadComplete && (
+                <button
+                  onClick={() => setIsDownloadMinimized(true)}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
+                  title="Minimizar"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M6 9l6 6 6-6"/>
+                  </svg>
+                </button>
+              )}
               <button
-                onClick={() => {
-                  setIsDownloadMinimized(true);
-                }}
+                onClick={() => { setPendingCancelReportId(null); handleCloseDownload(); }}
                 className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
-                title="Minimizar"
-              >
-                <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M6 9l6 6 6-6"/>
-                </svg>
-              </button>
-              <button
-                onClick={handleCloseDownload}
-                className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
-                title="Cerrar"
+                title={downloadComplete ? 'Cerrar' : 'Detener descarga'}
               >
                 <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -1587,33 +1656,48 @@ export default function App() {
                 {downloadingReports.map((report) => (
                   <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate flex-1">
-                        {report.name}
-                      </p>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {report.status === 'completed' ? (
+                          <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                            </svg>
+                          </div>
+                        ) : (
+                          <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                            <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                          </svg>
+                        )}
+                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                          {report.name}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                         <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
                           {report.progress}%
                         </p>
                         {report.status === 'downloading' && (
                           <button
-                            onClick={() => setShowCancelConfirmation(true)}
-                            className="hover:bg-[#F3F3F4] rounded p-1 transition-colors"
-                            title="Cancelar"
+                            onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
+                            className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
+                            title="Detener descarga"
                           >
-                            <svg className="w-3 h-3 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M6 6h12v12H6z"/>
                             </svg>
                           </button>
                         )}
                       </div>
                     </div>
-                    {/* Barra de progreso */}
-                    <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                        style={{ width: `${report.progress}%` }}
-                      />
-                    </div>
+                    {report.status !== 'completed' && (
+                      <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden ml-7" style={{ width: 'calc(100% - 1.75rem)' }}>
+                        <div
+                          className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                          style={{ width: `${report.progress}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1625,7 +1709,7 @@ export default function App() {
           </div>
 
           {/* Footer Actions */}
-          {downloadComplete && downloadingReports.length > 0 ? (
+          {downloadComplete ? (
             <div className="px-4 py-3 border-t border-[#D0D2D5] flex gap-2 flex-shrink-0">
               <button className="flex-1 bg-[#0C5BEF] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#0A4BC7] transition-colors">
                 Abrir carpeta
@@ -1716,9 +1800,9 @@ export default function App() {
                     </svg>
                   </button>
                   <button
-                    onClick={handleCloseDownload}
+                    onClick={() => { setPendingCancelReportId(null); handleCloseDownload(); }}
                     className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
-                    title="Cerrar"
+                    title="Detener descarga"
                   >
                     <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>

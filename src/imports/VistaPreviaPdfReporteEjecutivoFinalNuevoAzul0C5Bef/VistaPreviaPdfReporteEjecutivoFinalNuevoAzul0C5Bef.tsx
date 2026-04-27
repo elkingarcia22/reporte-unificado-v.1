@@ -1701,7 +1701,7 @@ function Group() {
 
 function Svg1() {
   return (
-    <div className="h-[360px] overflow-clip relative shrink-0 w-full" data-name="SVG">
+    <div className="h-[360px] overflow-visible relative shrink-0 w-full" data-name="SVG">
       <div className="absolute inset-[12.5%_17.5%]" data-name="Vector">
         <div className="absolute inset-[-0.14%_-0.19%_-0.19%_-0.19%]">
           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 234.9 270.909">
@@ -1894,8 +1894,8 @@ function Svg1() {
 
 function Svg() {
   return (
-    <div className="max-w-[360px] relative shadow-[0px_2px_2px_0px_rgba(0,0,0,0.06),0px_4px_3px_0px_rgba(0,0,0,0.07)] shrink-0 w-[360px]" data-name="SVG">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start justify-center max-w-[inherit] overflow-clip relative rounded-[inherit] size-full">
+    <div className="max-w-[360px] relative shrink-0 w-[360px]" data-name="SVG">
+      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start justify-center max-w-[inherit] overflow-visible relative rounded-[inherit] size-full">
         <Svg1 />
       </div>
     </div>
@@ -1905,7 +1905,7 @@ function Svg() {
 function BackgroundBorderShadow4() {
   return (
     <div className="bg-white col-2 h-[410px] justify-self-stretch relative rounded-[12px] row-1 self-center shrink-0" data-name="Background+Border+Shadow">
-      <div className="flex flex-row items-center justify-center overflow-clip rounded-[inherit] size-full">
+      <div className="flex flex-row items-center justify-center overflow-visible rounded-[inherit] size-full">
         <div className="content-stretch flex items-center justify-center p-[25px] relative size-full">
           <Svg />
         </div>
@@ -2453,7 +2453,7 @@ function PdfMainViewport() {
   return (
     <div className="bg-[#1e293b] h-[2343px] relative shrink-0 w-full z-[1]" data-name="PDF Main Viewport">
       <div className="overflow-clip rounded-[inherit] size-full">
-        <div className="content-stretch flex flex-col items-start pb-[74px] pt-[24px] px-[90px] relative size-full">
+        <div className="content-stretch flex flex-col items-center pb-[74px] pt-[24px] px-[90px] relative size-full">
           <Background />
         </div>
       </div>
