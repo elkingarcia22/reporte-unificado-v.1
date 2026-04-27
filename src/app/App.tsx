@@ -1197,13 +1197,7 @@ export default function App() {
                                   </p>
                                   {report.status !== 'completed' && (
                                     <button
-                                      onClick={() => {
-                                        if (isErrorDemoMode) {
-                                          handleCancelSingleReport(report.id);
-                                        } else {
-                                          setCancelConfirmReportId(report.id);
-                                        }
-                                      }}
+                                      onClick={() => setCancelConfirmReportId(report.id)}
                                       className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
                                       title="Detener descarga"
                                     >
@@ -1316,14 +1310,7 @@ export default function App() {
                         Minimizar y continuar
                       </button>
                       <button
-                        onClick={() => {
-                          if (isErrorDemoMode) {
-                            setPendingCancelReportId(null);
-                            handleConfirmCancel();
-                          } else {
-                            setShowDrawerCancelAllConfirm(true);
-                          }
-                        }}
+                        onClick={() => setShowDrawerCancelAllConfirm(true)}
                         className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1817,14 +1804,7 @@ export default function App() {
                 </button>
               )}
               <button
-                onClick={() => {
-                  if (isErrorDemoMode && !downloadComplete) {
-                    handleConfirmCancel();
-                  } else {
-                    setPendingCancelReportId(null);
-                    handleCloseDownload();
-                  }
-                }}
+                onClick={() => { setPendingCancelReportId(null); handleCloseDownload(); }}
                 className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
                 title={downloadComplete ? 'Cerrar' : 'Detener descarga'}
               >
@@ -1899,14 +1879,7 @@ export default function App() {
                             </p>
                             {report.status === 'downloading' && (
                               <button
-                                onClick={() => {
-                                  if (isErrorDemoMode) {
-                                    handleCancelSingleReport(report.id);
-                                  } else {
-                                    setPendingCancelReportId(report.id);
-                                    setShowCancelConfirmation(true);
-                                  }
-                                }}
+                                onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
                                 className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
                                 title="Detener descarga"
                               >
@@ -2029,14 +2002,7 @@ export default function App() {
                     </svg>
                   </button>
                   <button
-                    onClick={() => {
-                      if (isErrorDemoMode && !downloadComplete) {
-                        handleConfirmCancel();
-                      } else {
-                        setPendingCancelReportId(null);
-                        handleCloseDownload();
-                      }
-                    }}
+                    onClick={() => { setPendingCancelReportId(null); handleCloseDownload(); }}
                     className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
                     title="Detener descarga"
                   >
