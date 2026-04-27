@@ -172,11 +172,34 @@ export default function App() {
       setShowReportOptions(true);
       startMassiveDownload();
     } else {
-      // Para individual, cerrar drawer y abrir visualizador
-      handleCloseDrawer();
-      setTimeout(() => {
-        setShowPdfViewer(true);
-      }, 300);
+      // Para individual, generar PDF y abrir en nueva pestaña
+      try {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // Agregar contenido al PDF
+        pdf.setFontSize(16);
+        pdf.text('Reporte Ejecutivo', 20, 20);
+
+        pdf.setFontSize(12);
+        pdf.text(`Colaborador: ${selectedColaborador}`, 20, 40);
+        pdf.text(`Alcance: ${alcance}${alcanceFieldValue ? ` - ${alcanceFieldValue}` : ''}`, 20, 55);
+        pdf.text(`Peso 360°: ${peso360}%`, 20, 70);
+        pdf.text(`Peso Objetivos: ${pesoObjetivos}%`, 20, 85);
+
+        // Abrir en nueva pestaña
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+
+        handleCloseDrawer();
+      } catch (error) {
+        console.error('Error generando PDF:', error);
+        handleCloseDrawer();
+      }
     }
   };
 
