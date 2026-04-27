@@ -1569,16 +1569,20 @@ export default function App() {
                                     );
                                     setShowAlcanceFieldError(false);
                                   }}
-                                  className={`w-full px-4 py-2.5 text-left font-['Noto_Sans:Regular',sans-serif] text-sm transition-colors flex items-center justify-between ${
+                                  className={`w-full px-4 py-2.5 text-left font-['Noto_Sans:Regular',sans-serif] text-sm transition-colors flex items-center gap-3 ${
                                     alcanceFieldValue.includes(opt) ? 'text-[#0C5BEF] bg-[#EEF4FF]' : 'text-[#303A47] hover:bg-[#F3F3F4]'
                                   }`}
                                 >
-                                  {opt}
-                                  {alcanceFieldValue.includes(opt) && (
-                                    <svg className="w-4 h-4 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                                    </svg>
-                                  )}
+                                  <div className={`w-4 h-4 border-2 rounded flex items-center justify-center shrink-0 ${
+                                    alcanceFieldValue.includes(opt) ? 'bg-[#0C5BEF] border-[#0C5BEF]' : 'border-[#D0D2D5]'
+                                  }`}>
+                                    {alcanceFieldValue.includes(opt) && (
+                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                      </svg>
+                                    )}
+                                  </div>
+                                  <span>{opt}</span>
                                 </button>
                               ))
                             )}
