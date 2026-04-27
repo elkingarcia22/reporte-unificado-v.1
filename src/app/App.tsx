@@ -26,7 +26,7 @@ export default function App() {
   const [reportsInQueue, setReportsInQueue] = useState(0);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
-  const [showAnalysisList, setShowAnalysisList] = useState(false);
+  const [showAnalysisList, setShowAnalysisList] = useState(true);
   const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error' }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [showDrawerCancelAllConfirm, setShowDrawerCancelAllConfirm] = useState(false);
