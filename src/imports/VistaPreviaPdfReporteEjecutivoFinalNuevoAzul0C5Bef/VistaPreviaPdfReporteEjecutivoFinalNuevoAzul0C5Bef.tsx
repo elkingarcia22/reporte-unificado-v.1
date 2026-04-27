@@ -1617,8 +1617,8 @@ function Border() {
 
 function Text() {
   return (
-    <div className="absolute h-[13.523px] left-[180px] top-[18.25px] w-[78.027px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[78.027px]">
+    <div className="absolute h-[13.523px] left-[150px] top-[18.25px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Adaptación 82%</p>
       </div>
     </div>
@@ -1627,8 +1627,8 @@ function Text() {
 
 function Text1() {
   return (
-    <div className="absolute h-[13.523px] left-[304.2px] top-[101.95px] w-[75.557px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[75.557px]">
+    <div className="absolute h-[13.523px] left-[280px] top-[101.95px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Resolución 75%</p>
       </div>
     </div>
@@ -1637,8 +1637,8 @@ function Text1() {
 
 function Text2() {
   return (
-    <div className="absolute h-[13.523px] left-[304.2px] top-[245.95px] w-[62.137px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[62.137px]">
+    <div className="absolute h-[13.523px] left-[280px] top-[245.95px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Servicio 88%</p>
       </div>
     </div>
@@ -1647,8 +1647,8 @@ function Text2() {
 
 function Text3() {
   return (
-    <div className="absolute h-[13.523px] left-[180px] top-[326.95px] w-[68.518px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[68.518px]">
+    <div className="absolute h-[13.523px] left-[150px] top-[326.95px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Ejecución 91%</p>
       </div>
     </div>
@@ -1657,8 +1657,8 @@ function Text3() {
 
 function Text4() {
   return (
-    <div className="absolute h-[13.523px] left-[55.8px] top-[245.95px] w-[76.319px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[76.319px]">
+    <div className="absolute h-[13.523px] left-[-10px] top-[245.95px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Relaciones 80%</p>
       </div>
     </div>
@@ -1667,8 +1667,8 @@ function Text4() {
 
 function Text5() {
   return (
-    <div className="absolute h-[13.523px] left-[55.8px] top-[101.95px] w-[78.448px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[78.448px]">
+    <div className="absolute h-[13.523px] left-[-10px] top-[101.95px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Estratégico 70%</p>
       </div>
     </div>
@@ -1677,8 +1677,8 @@ function Text5() {
 
 function Text6() {
   return (
-    <div className="absolute h-[13.523px] left-[243px] top-[61.45px] w-[92.204px]" data-name="Text">
-      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[92.204px]">
+    <div className="absolute h-[13.523px] left-[200px] top-[40px] w-[130px]" data-name="Text">
+      <div className="-translate-y-1/2 absolute flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[13.523px] justify-center leading-[0] left-0 text-[#334155] text-[9.9px] top-[6.76px] w-[130px] whitespace-nowrap">
         <p className="leading-[normal]">Comunicación 85%</p>
       </div>
     </div>
