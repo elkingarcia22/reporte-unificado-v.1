@@ -1773,7 +1773,7 @@ export default function App() {
                 </h3>
               </div>
               {!downloadComplete && downloadingReports.length > 0 && (
-                <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs ml-7">
+                <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-xs">
                   {downloadingReports.filter(r => r.status === 'downloading').length} {downloadingReports.filter(r => r.status === 'downloading').length === 1 ? 'reporte' : 'reportes'} en cola
                 </p>
               )}
