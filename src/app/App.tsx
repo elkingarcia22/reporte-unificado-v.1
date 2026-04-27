@@ -313,7 +313,7 @@ export default function App() {
 
   const handleConfirmCancel = () => {
     if (pendingCancelReportId !== null) {
-      const stopFailed = isErrorDemoMode && Math.random() < 0.2;
+      const stopFailed = isErrorDemoMode;
       if (stopFailed) {
         setPendingCancelReportId(null);
         setShowCancelConfirmation(false);
@@ -341,7 +341,7 @@ export default function App() {
       });
       setPendingCancelReportId(null);
     } else {
-      const cancelAllFailed = isErrorDemoMode && Math.random() < 0.2;
+      const cancelAllFailed = isErrorDemoMode;
       if (cancelAllFailed) {
         setShowCancelConfirmation(false);
         setShowDrawerCancelAllConfirm(false);
@@ -370,7 +370,7 @@ export default function App() {
   };
 
   const handleCancelSingleReport = (id: number) => {
-    const stopFailed = isErrorDemoMode && Math.random() < 0.2;
+    const stopFailed = isErrorDemoMode;
     if (stopFailed) {
       setCancelConfirmReportId(null);
       setErrorNotification({
