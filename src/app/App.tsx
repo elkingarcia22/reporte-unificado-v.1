@@ -1909,7 +1909,7 @@ export default function App() {
       )}
 
       {/* Indicador minimizado de descarga - Google Drive style */}
-      {isDownloading && !isDrawerOpen && isDownloadMinimized && !downloadComplete && (
+      {isDownloading && !isDrawerOpen && isDownloadMinimized && (!downloadComplete || downloadingReports.some(r => r.status === 'error')) && (
         <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50">
           {downloadComplete ? (
             // Versión simplificada cuando está completado
