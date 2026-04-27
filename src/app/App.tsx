@@ -16,7 +16,7 @@ export default function App() {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [showColaboradorError, setShowColaboradorError] = useState(false);
   const [showAlcanceFieldError, setShowAlcanceFieldError] = useState(false);
-  const [alcanceFieldValue, setAlcanceFieldValue] = useState('');
+  const [alcanceFieldValue, setAlcanceFieldValue] = useState<string[]>([]);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -130,7 +130,7 @@ export default function App() {
       setPesoObjetivos('50');
       setShowColaboradorError(false);
       setShowAlcanceFieldError(false);
-      setAlcanceFieldValue('');
+      setAlcanceFieldValue([]);
       setShowReportOptions(false);
       // No resetear reportsInQueue aquí para mantener el contador
     }, 300);
@@ -170,7 +170,7 @@ export default function App() {
       setPesoObjetivos('50');
       setShowColaboradorError(false);
       setShowAlcanceFieldError(false);
-      setAlcanceFieldValue('');
+      setAlcanceFieldValue([]);
       setShowReportOptions(false);
     }, 300);
   };
@@ -187,7 +187,7 @@ export default function App() {
     }
 
     // Validar alcance para reporte masivo
-    if (reportType === 'Masivo' && alcance !== 'Todos los colaboradores en el análisis' && !alcanceFieldValue) {
+    if (reportType === 'Masivo' && alcance !== 'Todos los colaboradores en el análisis' && alcanceFieldValue.length === 0) {
       setShowAlcanceFieldError(true);
       return;
     }
@@ -1218,7 +1218,7 @@ export default function App() {
                                 />
                               </div>
                               <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                                {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
+                                {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue.length > 0 ? alcanceFieldValue.join(', ') : 'Seleccionado'}`}
                               </p>
                             </>
                           )}
@@ -1345,7 +1345,7 @@ export default function App() {
                   <button
                     onClick={() => {
                       setReportType('Individual');
-                      setAlcanceFieldValue('');
+                      setAlcanceFieldValue([]);
                       setShowAlcanceFieldError(false);
                     }}
                     className={`flex-1 py-2 px-4 rounded-md font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm transition-all ${
@@ -1526,8 +1526,12 @@ export default function App() {
                             showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
                           }`}
                         >
-                          <span className={alcanceFieldValue ? 'text-[#303A47]' : 'text-[#5C646F]'}>
-                            {alcanceFieldValue || `Seleccionar ${alcance.toLowerCase()}...`}
+                          <span className={alcanceFieldValue.length > 0 ? 'text-[#303A47]' : 'text-[#5C646F]'}>
+                            {alcanceFieldValue.length === 0
+                              ? `Seleccionar ${alcance.toLowerCase()}...`
+                              : alcanceFieldValue.length === 1
+                              ? alcanceFieldValue[0]
+                              : `${alcanceFieldValue.length} ${alcance.toLowerCase()}s seleccionados`}
                           </span>
                           <svg className={`w-4 h-4 text-[#303A47] transition-transform duration-200 ${openDropdown === 'alcanceField' ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
                             <path d="M7 10l5 5 5-5z"/>
@@ -1559,13 +1563,18 @@ export default function App() {
                                 <button
                                   key={opt}
                                   type="button"
-                                  onClick={() => { setAlcanceFieldValue(opt); setShowAlcanceFieldError(false); setOpenDropdown(null); }}
+                                  onClick={() => {
+                                    setAlcanceFieldValue(prev =>
+                                      prev.includes(opt) ? prev.filter(v => v !== opt) : [...prev, opt]
+                                    );
+                                    setShowAlcanceFieldError(false);
+                                  }}
                                   className={`w-full px-4 py-2.5 text-left font-['Noto_Sans:Regular',sans-serif] text-sm transition-colors flex items-center justify-between ${
-                                    alcanceFieldValue === opt ? 'text-[#0C5BEF] bg-[#EEF4FF]' : 'text-[#303A47] hover:bg-[#F3F3F4]'
+                                    alcanceFieldValue.includes(opt) ? 'text-[#0C5BEF] bg-[#EEF4FF]' : 'text-[#303A47] hover:bg-[#F3F3F4]'
                                   }`}
                                 >
                                   {opt}
-                                  {alcanceFieldValue === opt && (
+                                  {alcanceFieldValue.includes(opt) && (
                                     <svg className="w-4 h-4 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
                                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                                     </svg>
@@ -1581,13 +1590,13 @@ export default function App() {
                           Debes seleccionar {alcance === 'Área' ? 'un área' : alcance === 'Líder' ? 'un líder' : alcance === 'País' ? 'un país' : 'una ciudad'} para generar los reportes masivos.
                         </p>
                       )}
-                      {alcanceFieldValue && (
+                      {alcanceFieldValue.length > 0 && (
                         <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
                           <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                           </svg>
                           <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                            Se generarán reportes para los {getColaboradoresCount(alcance, alcanceFieldValue)} colaboradores
+                            Se generarán reportes para los {getColaboradoresCount(alcance, Array.isArray(alcanceFieldValue) ? alcanceFieldValue[0] : alcanceFieldValue)} colaboradores
                             {alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad'} seleccionado dentro del análisis actual.
                           </p>
                         </div>
@@ -1603,8 +1612,8 @@ export default function App() {
                       <input
                         type="text"
                         placeholder="Ingresar valor para Columna A..."
-                        value={alcanceFieldValue}
-                        onChange={(e) => { setAlcanceFieldValue(e.target.value); setShowAlcanceFieldError(false); }}
+                        value={Array.isArray(alcanceFieldValue) ? '' : alcanceFieldValue}
+                        onChange={(e) => { setAlcanceFieldValue([e.target.value]); setShowAlcanceFieldError(false); }}
                         className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'}`}
                       />
                       {showAlcanceFieldError && (
@@ -1621,8 +1630,8 @@ export default function App() {
                       <input
                         type="text"
                         placeholder="Ingresar valor para Columna B..."
-                        value={alcanceFieldValue}
-                        onChange={(e) => { setAlcanceFieldValue(e.target.value); setShowAlcanceFieldError(false); }}
+                        value={Array.isArray(alcanceFieldValue) ? '' : alcanceFieldValue}
+                        onChange={(e) => { setAlcanceFieldValue([e.target.value]); setShowAlcanceFieldError(false); }}
                         className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'}`}
                       />
                       {showAlcanceFieldError && (
