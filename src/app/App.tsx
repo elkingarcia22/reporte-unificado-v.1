@@ -1768,17 +1768,6 @@ export default function App() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#D0D2D5] flex-shrink-0">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                {downloadComplete ? (
-                  <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                    </svg>
-                  </div>
-                ) : (
-                  <svg className="w-5 h-5 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
-                  </svg>
-                )}
                 <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
                   {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? 'Descargas completadas' : 'Descargando reportes'}
                 </h3>
