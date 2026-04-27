@@ -31,6 +31,9 @@ export default function App() {
   const searchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
+  // Detectar si estamos en modo preview del PDF
+  const isPdfPreviewMode = new URLSearchParams(window.location.search).get('pdf-preview') === 'true';
+
   // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -172,34 +175,21 @@ export default function App() {
       setShowReportOptions(true);
       startMassiveDownload();
     } else {
-      // Para individual, generar PDF y abrir en nueva pestaña
-      try {
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        });
+      // Para individual, abrir previsualizador en nueva pestaña y mostrar estado en drawer
+      window.open('?pdf-preview=true', '_blank');
 
-        // Agregar contenido al PDF
-        pdf.setFontSize(16);
-        pdf.text('Reporte Ejecutivo', 20, 20);
-
-        pdf.setFontSize(12);
-        pdf.text(`Colaborador: ${selectedColaborador}`, 20, 40);
-        pdf.text(`Alcance: ${alcance}${alcanceFieldValue ? ` - ${alcanceFieldValue}` : ''}`, 20, 55);
-        pdf.text(`Peso 360°: ${peso360}%`, 20, 70);
-        pdf.text(`Peso Objetivos: ${pesoObjetivos}%`, 20, 85);
-
-        // Abrir en nueva pestaña
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
-
-        handleCloseDrawer();
-      } catch (error) {
-        console.error('Error generando PDF:', error);
-        handleCloseDrawer();
-      }
+      // Mostrar estado de reporte en cola en el drawer
+      setShowReportOptions(true);
+      setIsDownloading(true);
+      setDownloadComplete(true);
+      setDownloadingReports([
+        {
+          id: Date.now(),
+          name: 'Reporte_Ejecutivo_Individual.pdf',
+          progress: 100,
+          status: 'completed'
+        }
+      ]);
     }
   };
 
@@ -294,6 +284,17 @@ export default function App() {
       }
     ]);
   };
+
+  // Si estamos en modo preview del PDF
+  if (isPdfPreviewMode) {
+    return (
+      <div className="bg-[#2d2d2d] h-screen w-screen overflow-hidden flex items-center justify-center">
+        <div className="h-[98vh] w-[98vw] overflow-y-auto overflow-x-auto relative bg-[#2d2d2d] rounded flex items-center justify-center">
+          <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
+        </div>
+      </div>
+    );
+  }
 
   // Si está mostrando el visualizador de PDF, mostrar solo eso
   if (showPdfViewer) {
