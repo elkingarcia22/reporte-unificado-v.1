@@ -1218,7 +1218,7 @@ export default function App() {
                                 />
                               </div>
                               <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                                {alcance === 'Todos los colaboradores' ? '142 colaboradores' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
+                                {alcance === 'Todos los colaboradores' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
                               </p>
                             </>
                           )}
@@ -1495,7 +1495,7 @@ export default function App() {
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                         </svg>
                         <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                          Se generarán reportes para los {getColaboradoresCount('Todos los colaboradores', '')} colaboradores analizados en el ciclo actual.
+                          Se generarán reportes para los {getColaboradoresCount('Todos los colaboradores', '')} colaboradores analizados en el análisis actual.
                         </p>
                       </div>
                     )}
