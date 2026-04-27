@@ -2463,7 +2463,7 @@ function PdfMainViewport() {
 
 export default function VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef() {
   return (
-    <div className="content-stretch flex flex-col isolate items-center justify-center relative size-full" style={{ backgroundImage: "linear-gradient(90deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)" }} data-name="Vista Previa PDF - Reporte Ejecutivo Final (Nuevo Azul #0C5BEF)">
+    <div className="content-stretch flex flex-col isolate items-start relative size-full overflow-y-auto" style={{ backgroundImage: "linear-gradient(90deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)" }} data-name="Vista Previa PDF - Reporte Ejecutivo Final (Nuevo Azul #0C5BEF)">
       <HeaderPdfViewerToolbar />
       <PdfMainViewport />
     </div>
