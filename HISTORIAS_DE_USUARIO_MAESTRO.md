@@ -1,9 +1,10 @@
 # Reporte Maestro de Historias de Usuario
 ## Sistema de Generación de Reportes de Análisis de Talento
 
-**Versión:** 1.0  
-**Fecha:** Abril 2026  
+**Versión:** 1.1  
+**Fecha:** Abril 27, 2026  
 **Propósito:** Guía completa para desarrolladores sobre casos de uso, validaciones y manejo de errores
+**Actualización v1.1:** Multiselect con checkboxes para Área, Líder, País y Ciudad. Mensajes dinámicos singular/plural.
 
 ---
 
@@ -85,22 +86,23 @@
 
 ---
 
-### Flujo 2: Reporte Masivo por Empresa (Análisis Q2 2025)
+### Flujo 2: Reporte Masivo por Todos los Colaboradores (Análisis Q2 2025)
 
 **Usuario:** Gestor RH  
-**Objetivo:** Generar reportes para toda la empresa
+**Objetivo:** Generar reportes para todos los colaboradores en el análisis
 
 #### Pasos:
 
 1. **Configuración**
    - Tipo de Reporte: "Masivo"
-   - Alcance: "Toda la empresa"
+   - Alcance: "Todos los colaboradores en el análisis"
    - Peso 360: 50
    - Peso Objetivos: 50
 
 2. **Validación**
    - Sistema valida que no hay campos adicionales requeridos
    - Habilita botón "Generar más reportes"
+   - Mensaje informativo: "Se generarán reportes para los 10 colaboradores dentro del análisis actual."
 
 3. **Generación en Cola**
    - Click en "Generar más reportes"
@@ -115,54 +117,70 @@
 
 5. **Completitud**
    - Todos los reportes se descargan sin errores
-   - Mensaje: "Descargas completadas"
+   - Mensaje: "Reportes generados y descargados. Listos para visualizar."
    - Icono: Checkmark verde
 
 **Resultado Esperado:**
-- ✅ Múltiples archivos PDF descargados
+- ✅ 10 archivos PDF descargados
 - ✅ Cola procesada completamente
 - ✅ Interfaz responsiva durante descarga
+- ✅ Mensaje clarifica contexto "dentro del análisis actual"
 
 ---
 
 ### Flujo 3: Reporte Masivo por Área (Análisis Q2 2025)
 
 **Usuario:** Analista RH  
-**Objetivo:** Generar reportes para un área específica
+**Objetivo:** Generar reportes para una o más áreas específicas
 
 #### Pasos:
 
 1. **Configuración**
    - Tipo de Reporte: "Masivo"
    - Alcance: "Área"
-   - Campo Área: "Tecnología"
+   - Campo Área: "Tecnología" (multiselect - puede seleccionar varias)
    - Peso 360: 60
    - Peso Objetivos: 40
 
-2. **Validación de Campo**
-   - Sistema valida que "Tecnología" existe en BD
-   - Cuenta 3 colaboradores en área Tecnología
-   - Campo válido, botón habilitado
+2. **Selección de Áreas**
+   - Click en dropdown "Seleccionar Área..."
+   - Aparece lista con checkboxes
+   - Selecciona "Tecnología" (4 colaboradores)
+   - Botón muestra: "1 área seleccionada"
+   - Dropdown permanece abierto para más selecciones
+   - Deselecciona si es necesario
 
-3. **Generación**
+3. **Validación de Campo**
+   - Sistema valida que área(s) existe(n) en BD
+   - Cuenta 4 colaboradores en Tecnología
+   - Campo válido, botón habilitado
+   - Mensaje informativo: "Se generarán reportes para los 4 colaboradores del área seleccionado dentro del análisis actual."
+
+4. **Generación**
    - Click en "Generar más reportes"
-   - Sistema crea 3 reportes (uno por colaborador)
+   - Sistema crea 4 reportes (uno por colaborador)
    - Inicia descarga en paralelo
 
-4. **Monitoreo**
-   - Panel muestra: "3 reportes en cola"
+5. **Monitoreo**
+   - Panel muestra: "4 reportes en cola"
    - Progreso individual visible para cada reporte
    - Usuarios pueden minimizar sin interrumpir
 
-5. **Completitud**
-   - 3 reportes descargados: 100%
+6. **Completitud**
+   - 4 reportes descargados: 100%
    - Carpeta contiene archivos nombrados por colaborador
    - Opción para abrir carpeta
 
 **Resultado Esperado:**
-- ✅ 3 archivos generados y descargados
+- ✅ 4 archivos generados y descargados
 - ✅ Nombrado apropiadamente
 - ✅ Sin errores en validación o descarga
+- ✅ Multiselect funcional con checkboxes
+
+**Nota: Multiselect Avanzado**
+- Usuario puede seleccionar múltiples áreas (ej: Tecnología + Ventas)
+- Botón muestra: "2 áreas seleccionadas"
+- Mensaje pluraliza: "Se generarán reportes para los X colaboradores de las áreas seleccionados dentro del análisis actual."
 
 ---
 
@@ -277,67 +295,111 @@ Acción: Genera reportes para los 10 colaboradores
 Mensaje: "Toda la empresa seleccionada"
 ```
 
-#### Selección: "Área"
+#### Selección: "Área" (MULTISELECT con Checkboxes)
 ```
-Validación: REQUERIDA
-Campo Adicional: Sí (Dropdown "Seleccionar Área")
-Opciones del Dropdown:
-  - Tecnología (4 colaboradores)
-  - Ventas (2 colaboradores)
-  - Marketing (2 colaboradores)
-  - Operaciones (1 colaborador)
-  - Recursos Humanos (1 colaborador)
+Validación: REQUERIDA (al menos 1 área)
+Campo Adicional: Sí (Dropdown Multiselect "Seleccionar Área...")
+Tipo: Multiselect con checkboxes
 
-Mensaje Error (si no selecciona):
+Opciones del Dropdown:
+  - ☐ Tecnología (4 colaboradores)
+  - ☐ Ventas (2 colaboradores)
+  - ☐ Marketing (2 colaboradores)
+  - ☐ Operaciones (1 colaborador)
+  - ☐ Recursos Humanos (1 colaborador)
+
+Comportamiento del Dropdown de Área (NUEVO):
+- Muestra lista de áreas con checkboxes
+- Dropdown NO cierra al seleccionar (permite multiselect)
+- Búsqueda activa mientras dropdown está abierto
+- Checkmark visible cuando área está seleccionada
+- Botón muestra: "1 área seleccionada" o "X áreas seleccionadas"
+- Si fetchDataError === true: Mensaje "Error al cargar datos"
+
+Mensaje Error (si no selecciona ninguna):
 "Debes seleccionar un área para generar los reportes masivos."
 
-Comportamiento del Dropdown de Área:
-- Muestra lista de áreas disponibles
-- Búsqueda activa
-- Si fetchDataError === true: Mensaje "Error al cargar datos"
+Mensaje Informativo (dinámico):
+- 1 área: "Se generarán reportes para los X colaboradores del área seleccionado dentro del análisis actual."
+- 2+ áreas: "Se generarán reportes para los X colaboradores de las áreas seleccionados dentro del análisis actual."
 ```
 
-#### Selección: "Líder"
+#### Selección: "Líder" (MULTISELECT con Checkboxes)
 ```
-Validación: REQUERIDA
-Campo Adicional: Sí (Dropdown "Seleccionar Líder")
+Validación: REQUERIDA (al menos 1 líder)
+Campo Adicional: Sí (Dropdown Multiselect "Seleccionar Líder...")
+Tipo: Multiselect con checkboxes
+
 Opciones del Dropdown:
-  - Juan Pérez (3 colaboradores)
-  - María González (2 colaboradores)
-  - Carlos Rodríguez (2 colaboradores)
-  - Ana Martínez (1 colaborador)
+  - ☐ Juan Pérez (3 colaboradores)
+  - ☐ María González (2 colaboradores)
+  - ☐ Carlos Rodríguez (2 colaboradores)
+  - ☐ Ana Martínez (1 colaborador)
 
-Mensaje Error:
+Comportamiento del Dropdown de Líder (NUEVO):
+- Muestra lista de líderes con checkboxes
+- Dropdown NO cierra al seleccionar (permite multiselect)
+- Búsqueda activa mientras dropdown está abierto
+- Checkmark visible cuando líder está seleccionado
+- Botón muestra: "1 líder seleccionado" o "X líderes seleccionados"
+- Manejo de errores de datos
+
+Mensaje Error (si no selecciona ninguno):
 "Debes seleccionar un líder para generar los reportes masivos."
 
-Comportamiento:
-- Dropdown expandible
-- Búsqueda funcional
-- Manejo de errores de datos
+Mensaje Informativo (dinámico):
+- 1 líder: "Se generarán reportes para los X colaboradores bajo este líder seleccionado dentro del análisis actual."
+- 2+ líderes: "Se generarán reportes para los X colaboradores bajo estos líderes seleccionados dentro del análisis actual."
 ```
 
-#### Selección: "País"
+#### Selección: "País" (MULTISELECT con Checkboxes)
 ```
-Validación: REQUERIDA
-Campo Adicional: Sí (Dropdown "Seleccionar País")
+Validación: REQUERIDA (al menos 1 país)
+Campo Adicional: Sí (Dropdown Multiselect "Seleccionar País...")
+Tipo: Multiselect con checkboxes
+
 Opciones del Dropdown:
-  - Colombia (4 colaboradores)
-  - México (2 colaboradores)
-  - Argentina (2 colaboradores)
-  - Chile (2 colaboradores)
-  - Perú (1 colaborador)
+  - ☐ Colombia (4 colaboradores)
+  - ☐ México (2 colaboradores)
+  - ☐ Argentina (2 colaboradores)
+  - ☐ Chile (2 colaboradores)
+  - ☐ Perú (1 colaborador)
 
-Mensaje Error:
+Comportamiento del Dropdown de País (NUEVO):
+- Muestra lista de países con checkboxes
+- Dropdown NO cierra al seleccionar (permite multiselect)
+- Búsqueda activa mientras dropdown está abierto
+- Checkmark visible cuando país está seleccionado
+- Botón muestra: "1 país seleccionado" o "X países seleccionados"
+
+Mensaje Error (si no selecciona ninguno):
 "Debes seleccionar un país para generar los reportes masivos."
+
+Mensaje Informativo (dinámico):
+- 1 país: "Se generarán reportes para los X colaboradores del país seleccionado dentro del análisis actual."
+- 2+ países: "Se generarán reportes para los X colaboradores de los países seleccionados dentro del análisis actual."
 ```
 
-#### Selección: "Ciudad"
+#### Selección: "Ciudad" (MULTISELECT con Checkboxes)
 ```
-Validación: REQUERIDA
-Campo Adicional: Sí (Dropdown "Seleccionar Ciudad")
+Validación: REQUERIDA (al menos 1 ciudad)
+Campo Adicional: Sí (Dropdown Multiselect "Seleccionar Ciudad...")
+Tipo: Multiselect con checkboxes
 Usa lista completa de ciudades
-Mensaje Error:
+
+Comportamiento del Dropdown de Ciudad (NUEVO):
+- Muestra lista de ciudades con checkboxes
+- Dropdown NO cierra al seleccionar (permite multiselect)
+- Búsqueda activa mientras dropdown está abierto
+- Checkmark visible cuando ciudad está seleccionada
+- Botón muestra: "1 ciudad seleccionada" o "X ciudades seleccionadas"
+
+Mensaje Error (si no selecciona ninguna):
 "Debes seleccionar una ciudad para generar los reportes masivos."
+
+Mensaje Informativo (dinámico):
+- 1 ciudad: "Se generarán reportes para los X colaboradores de la ciudad seleccionada dentro del análisis actual."
+- 2+ ciudades: "Se generarán reportes para los X colaboradores de las ciudades seleccionadas dentro del análisis actual."
 ```
 
 ---
@@ -357,6 +419,55 @@ Nota Importante:
 - Actualmente NO hay validación de suma = 100
 - Implementar si es requerido en futuro
 - Valores aceptados: cualquier número 0-100
+```
+
+---
+
+### Comportamiento de Multiselect (Área, Líder, País, Ciudad)
+
+**Nuevo en v1.1: Multiselect con Checkboxes**
+
+```
+Campos Afectados:
+- Campo Área (alcance = "Área")
+- Campo Líder (alcance = "Líder")
+- Campo País (alcance = "País")
+- Campo Ciudad (alcance = "Ciudad")
+
+Características Principales:
+1. Checkboxes visibles en cada opción
+2. Dropdown permanece abierto después de seleccionar
+3. Permite seleccionar múltiples opciones sin cerrar
+4. Deseleccionar: Click nuevamente en checkbox
+5. Botón dinámico que muestra cantidad de selecciones
+
+Estado del Botón Dropdown:
+- Vacío: "Seleccionar [Área/Líder/País/Ciudad]..."
+- 1 seleccionado: "1 [área/líder/país/ciudad] seleccionada/o"
+- 2+ seleccionados: "X [áreas/líderes/países/ciudades] seleccionadas/os"
+
+Mensajes Dinámicos (Singular vs Plural):
+El mensaje informativo se adapta automáticamente:
+- 1 selección: Usa singular ("del área", "bajo este líder", "del país", "de la ciudad")
+- 2+ selecciones: Usa plural ("de las áreas", "bajo estos líderes", "de los países", "de las ciudades")
+- Final siempre: "dentro del análisis actual"
+
+Ejemplo de Variaciones:
+Área:
+  - 1 seleccionada: "...colaboradores del área seleccionado..."
+  - 2+ seleccionadas: "...colaboradores de las áreas seleccionados..."
+
+Líder:
+  - 1 seleccionado: "...colaboradores bajo este líder seleccionado..."
+  - 2+ seleccionados: "...colaboradores bajo estos líderes seleccionados..."
+
+País:
+  - 1 seleccionado: "...colaboradores del país seleccionado..."
+  - 2+ seleccionados: "...colaboradores de los países seleccionados..."
+
+Ciudad:
+  - 1 seleccionada: "...colaboradores de la ciudad seleccionada..."
+  - 2+ seleccionadas: "...colaboradores de las ciudades seleccionadas..."
 ```
 
 ---
@@ -801,12 +912,31 @@ Tamaño: max-width: 448px (max-w-md)
 | # | Tipo | Alcance | Input | Resultado Esperado |
 |---|------|---------|-------|-------------------|
 | 1 | Individual | - | Elkin Garcia | ✅ 1 reporte descargado |
-| 2 | Masivo | Toda la empresa | - | ✅ 10 reportes descargados |
-| 3 | Masivo | Área | Tecnología | ✅ 4 reportes descargados |
-| 4 | Masivo | Área | Ventas | ✅ 2 reportes descargados |
-| 5 | Masivo | Líder | Juan Pérez | ✅ 3 reportes descargados |
-| 6 | Masivo | País | Colombia | ✅ 4 reportes descargados |
-| 7 | Masivo | Ciudad | Bogotá | ✅ 3 reportes descargados |
+| 2 | Masivo | Todos los colaboradores | - | ✅ 10 reportes descargados |
+| 3 | Masivo | Área | Tecnología (1 seleccionada) | ✅ 4 reportes descargados |
+| 4 | Masivo | Área | Ventas (1 seleccionada) | ✅ 2 reportes descargados |
+| 5 | Masivo | Área | Tecnología + Ventas (2) | ✅ 6 reportes descargados |
+| 6 | Masivo | Líder | Juan Pérez (1 seleccionado) | ✅ 3 reportes descargados |
+| 7 | Masivo | Líder | Juan Pérez + María (2) | ✅ 5 reportes descargados |
+| 8 | Masivo | País | Colombia (1 seleccionado) | ✅ 4 reportes descargados |
+| 9 | Masivo | País | Colombia + México (2) | ✅ 6 reportes descargados |
+| 10 | Masivo | Ciudad | Bogotá (1 seleccionada) | ✅ 3 reportes descargados |
+
+**Casos de Multiselect Nuevos (v1.1):**
+
+| # | Tipo | Alcance | Input | Comportamiento Esperado |
+|---|------|---------|-------|--------------------------|
+| 11 | Masivo | Área | Múltiple selección | ✅ Dropdown permanece abierto |
+| 12 | Masivo | Área | Múltiple selección | ✅ Botón muestra "X áreas seleccionadas" |
+| 13 | Masivo | Área | 1 área | ✅ Mensaje: "...del área seleccionado..." |
+| 14 | Masivo | Área | 2+ áreas | ✅ Mensaje: "...de las áreas seleccionados..." |
+| 15 | Masivo | Líder | Múltiple selección | ✅ Dropdown permanece abierto |
+| 16 | Masivo | Líder | 1 líder | ✅ Mensaje: "...bajo este líder seleccionado..." |
+| 17 | Masivo | Líder | 2+ líderes | ✅ Mensaje: "...bajo estos líderes seleccionados..." |
+| 18 | Masivo | País | 1 país | ✅ Mensaje: "...del país seleccionado..." |
+| 19 | Masivo | País | 2+ países | ✅ Mensaje: "...de los países seleccionados..." |
+| 20 | Masivo | Ciudad | 1 ciudad | ✅ Mensaje: "...de la ciudad seleccionada..." |
+| 21 | Masivo | Ciudad | 2+ ciudades | ✅ Mensaje: "...de las ciudades seleccionadas..." |
 
 ---
 
@@ -912,7 +1042,7 @@ Cierre: Click fuera o botón cerrar
 
 - [ ] **Análisis Q2 2025 - Happy Path**
   - [ ] Individual: Generar y descargar (exitoso)
-  - [ ] Masivo Empresa: Generar 10 reportes (exitosos)
+  - [ ] Masivo Todos los colaboradores: Generar 10 reportes (exitosos)
   - [ ] Masivo Área: Dropdown carga correctamente
   - [ ] Masivo Líder: Validar datos
   - [ ] Masivo País: Validar datos
@@ -927,7 +1057,7 @@ Cierre: Click fuera o botón cerrar
   - [ ] Masivo Líder: Falla 100%
   - [ ] Masivo País: Falla 100%
   - [ ] Masivo Ciudad: Falla 100%
-  - [ ] Masivo Empresa: ÉXITO (no falla)
+  - [ ] Masivo Todos los colaboradores: ÉXITO (no falla)
   - [ ] Detener individual: Falla confirmación
   - [ ] Cancelar todos: Falla confirmación
 
@@ -959,6 +1089,23 @@ Cierre: Click fuera o botón cerrar
   - [ ] Botón "Abrir carpeta": Oculto si hay errores
   - [ ] Mensaje éxito: Oculto si hay errores
 
+- [ ] **Multiselect con Checkboxes (v1.1 NEW)**
+  - [ ] Área: Checkboxes visibles en dropdown
+  - [ ] Líder: Checkboxes visibles en dropdown
+  - [ ] País: Checkboxes visibles en dropdown
+  - [ ] Ciudad: Checkboxes visibles en dropdown
+  - [ ] Dropdown NO cierra al seleccionar
+  - [ ] Múltiples selecciones permitidas
+  - [ ] Deseleccionar al hacer click nuevamente
+  - [ ] Botón muestra "1 [item] seleccionado/a"
+  - [ ] Botón muestra "X [items] seleccionados/as" (plural)
+  - [ ] Mensaje informativo pluraliza dinámicamente
+  - [ ] "del área" (1) vs "de las áreas" (2+)
+  - [ ] "bajo este líder" (1) vs "bajo estos líderes" (2+)
+  - [ ] "del país" (1) vs "de los países" (2+)
+  - [ ] "de la ciudad" (1) vs "de las ciudades" (2+)
+  - [ ] Mensaje siempre termina con "dentro del análisis actual"
+
 ---
 
 ## Notas Importantes
@@ -974,16 +1121,18 @@ Cierre: Click fuera o botón cerrar
 
 1. Los errores son SIMULADOS (modo demo)
 2. En producción, usarían APIs reales
-3. La tasa de error es 100% en modo demo (excepto "Toda la empresa")
+3. La tasa de error es 100% en modo demo (excepto "Todos los colaboradores en el análisis")
 4. Los errores ocurren después de 2-3 segundos (simular tiempo real)
+5. **Nota v1.1:** El mensaje de éxito ahora incluye "dentro del análisis actual" para mayor claridad
 
 ### Sobre las Validaciones
 
 1. Todas las validaciones ocurren ANTES de generar
 2. Campo colaborador: Solo para Individual
 3. Campo alcance: Requerido para Masivo
-4. Campo búsqueda: Requerido para Masivo con filtro
+4. Campos multiselect (Área, Líder, País, Ciudad): Requerido al menos 1 selección
 5. Validación en tiempo real: Ocurre en `onChange`
+6. **Nuevo en v1.1:** Multiselect permite seleccionar múltiples opciones con checkboxes
 
 ### Sobre la UX
 
@@ -992,6 +1141,10 @@ Cierre: Click fuera o botón cerrar
 3. Toast notificaciones para feedback inmediato
 4. Modal de confirmación para acciones destructivas
 5. Estados visuales claros (spinners, checkmarks, X)
+6. **Nuevo en v1.1:** Multiselect con checkboxes en Área, Líder, País, Ciudad
+7. Dropdown permanece abierto durante multiselect para mejor UX
+8. Mensajes dinámicos que se adaptan a singular/plural automáticamente
+9. Botón dinámico que muestra cantidad de selecciones
 
 ---
 
@@ -1009,6 +1162,10 @@ Cierre: Click fuera o botón cerrar
 | **isErrorDemoMode** | Indica si estamos en análisis con errores |
 | **Colaborador** | Persona para la cual se genera reporte |
 | **Alcance** | Filtro de alcance del reporte masivo |
+| **Multiselect** | Capacidad de seleccionar múltiples opciones desde un dropdown |
+| **Checkbox** | Elemento visual que indica selección/deselección |
+| **Mensaje Dinámico** | Texto que se adapta automáticamente según el número de selecciones (singular/plural) |
+| **Dentro del Análisis Actual** | Contexto que clarifica que los colaboradores pertenecen al análisis seleccionado |
 
 ---
 
@@ -1016,9 +1173,17 @@ Cierre: Click fuera o botón cerrar
 
 **Para preguntas sobre esta especificación:**
 - Revisar código en: `/src/app/App.tsx`
-- Estado: Versión 1.0 (Abril 2026)
+- Estado: Versión 1.1 (Abril 27, 2026)
 - Documentación: Este archivo
 - Pruebas: Usar ambos análisis para validar casos
+
+**Cambios en v1.1:**
+- ✨ Implementación de multiselect con checkboxes para Área, Líder, País y Ciudad
+- ✨ Mensajes dinámicos que se adaptan a singular/plural automáticamente
+- ✨ Dropdown permanece abierto durante multiselect para mejor UX
+- ✨ Botón dinámico mostrando cantidad de selecciones
+- 🔄 Actualización de términología: "Toda la empresa" → "Todos los colaboradores en el análisis"
+- 📝 Matriz de casos de prueba expandida con 11 nuevos casos de multiselect
 
 ---
 
