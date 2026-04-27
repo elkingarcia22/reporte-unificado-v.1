@@ -61,6 +61,16 @@ export default function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Auto-dismiss error notification después de 4 segundos
+  useEffect(() => {
+    if (errorNotification) {
+      const timer = setTimeout(() => {
+        setErrorNotification(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorNotification]);
+
   const isErrorDemoMode = selectedAnalysisId === 2;
 
   const colaboradores = [
@@ -2057,36 +2067,20 @@ export default function App() {
       );
       })()}
 
-      {/* Toast de error - Centrado abajo */}
+      {/* Toast de error - Centrado abajo, compacto */}
       {errorNotification && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] w-full px-4 max-w-2xl animate-[slideUp_0.3s_ease-in-out]">
-          <div className="bg-[#FEF3F2] rounded-2xl border-2 border-[#E7A7A7] p-6 shadow-lg">
-            <div className="flex items-start gap-4">
-              <div className="bg-[#D92D20] rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] w-full px-4 max-w-md animate-[slideUp_0.3s_ease-in-out]">
+          <div className="bg-[#FEF3F2] rounded-lg border border-[#FED4D1] p-3 shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="bg-[#D92D20] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#D92D20] text-base mb-1">{errorNotification.title}</h4>
-                <p className="font-['Noto_Sans:Regular',sans-serif] text-[#8B4545] text-sm leading-relaxed">{errorNotification.message}</p>
-                {errorNotification.actionLabel && (
-                  <button
-                    onClick={() => { errorNotification.onAction?.(); setErrorNotification(null); }}
-                    className="mt-3 text-[#D92D20] text-sm font-['Noto_Sans:Bold',sans-serif] hover:underline"
-                  >
-                    {errorNotification.actionLabel} →
-                  </button>
-                )}
+                <p className="font-['Noto_Sans:Bold',sans-serif] text-[#D92D20] text-xs mb-0.5">{errorNotification.title}</p>
+                <p className="font-['Noto_Sans:Regular',sans-serif] text-[#8B4545] text-xs leading-tight">{errorNotification.message}</p>
               </div>
-              <button
-                onClick={() => setErrorNotification(null)}
-                className="text-[#D92D20] hover:text-[#A71E17] transition-colors flex-shrink-0 self-start mt-0.5"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
             </div>
           </div>
         </div>
