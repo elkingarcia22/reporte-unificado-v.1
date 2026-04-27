@@ -1780,7 +1780,7 @@ export default function App() {
                   </svg>
                 )}
                 <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-sm">
-                  {downloadComplete ? 'Descargas completadas' : 'Descargando reportes'}
+                  {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? 'Descargas completadas' : 'Descargando reportes'}
                 </h3>
               </div>
               {!downloadComplete && downloadingReports.length > 0 && (
