@@ -2081,6 +2081,14 @@ export default function App() {
                 <p className="font-['Noto_Sans:Bold',sans-serif] text-[#D92D20] text-xs mb-0.5">{errorNotification.title}</p>
                 <p className="font-['Noto_Sans:Regular',sans-serif] text-[#8B4545] text-xs leading-tight">{errorNotification.message}</p>
               </div>
+              <button
+                onClick={() => setErrorNotification(null)}
+                className="text-[#D92D20] hover:text-[#A71E17] transition-colors flex-shrink-0 self-start"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
