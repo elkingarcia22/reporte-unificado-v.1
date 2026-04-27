@@ -6,7 +6,7 @@ import VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef from '../imports/Vista
 export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [reportType, setReportType] = useState<'Individual' | 'Masivo'>('Individual');
-  const [alcance, setAlcance] = useState('Todos los colaboradores');
+  const [alcance, setAlcance] = useState('Todos los colaboradores en el análisis');
   const [peso360, setPeso360] = useState('50');
   const [pesoObjetivos, setPesoObjetivos] = useState('50');
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,7 +88,7 @@ export default function App() {
 
   // Función para contar colaboradores según el alcance y valor seleccionado
   const getColaboradoresCount = (alcanceType: string, fieldValue: string): number => {
-    if (alcanceType === 'Todos los colaboradores') {
+    if (alcanceType === 'Todos los colaboradores en el análisis') {
       return colaboradores.length;
     }
     if (alcanceType === 'Área') {
@@ -125,7 +125,7 @@ export default function App() {
       setSelectedColaborador('');
       setShowSuggestions(false);
       setReportType('Individual');
-      setAlcance('Todos los colaboradores');
+      setAlcance('Todos los colaboradores en el análisis');
       setPeso360('50');
       setPesoObjetivos('50');
       setShowColaboradorError(false);
@@ -165,7 +165,7 @@ export default function App() {
       setSelectedColaborador('');
       setShowSuggestions(false);
       setReportType('Individual');
-      setAlcance('Todos los colaboradores');
+      setAlcance('Todos los colaboradores en el análisis');
       setPeso360('50');
       setPesoObjetivos('50');
       setShowColaboradorError(false);
@@ -187,7 +187,7 @@ export default function App() {
     }
 
     // Validar alcance para reporte masivo
-    if (reportType === 'Masivo' && alcance !== 'Todos los colaboradores' && !alcanceFieldValue) {
+    if (reportType === 'Masivo' && alcance !== 'Todos los colaboradores en el análisis' && !alcanceFieldValue) {
       setShowAlcanceFieldError(true);
       return;
     }
@@ -204,10 +204,10 @@ export default function App() {
 
     setIsGeneratingPdf(false);
 
-    // Simular fallo: individual siempre falla, masivo solo si no es "Todos los colaboradores"
+    // Simular fallo: individual siempre falla, masivo solo si no es "Todos los colaboradores en el análisis"
     const generateFailed = isErrorDemoMode && (
       reportType === 'Individual' ||
-      (reportType === 'Masivo' && alcance !== 'Todos los colaboradores')
+      (reportType === 'Masivo' && alcance !== 'Todos los colaboradores en el análisis')
     );
     if (generateFailed) {
       setErrorNotification({
@@ -1218,7 +1218,7 @@ export default function App() {
                                 />
                               </div>
                               <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                                {alcance === 'Todos los colaboradores' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
+                                {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue || 'Seleccionado'}`}
                               </p>
                             </>
                           )}
@@ -1468,7 +1468,7 @@ export default function App() {
                       </button>
                       {openDropdown === 'alcance' && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-xl z-50 overflow-hidden">
-                          {['Todos los colaboradores', 'Área', 'Líder', 'País', 'Ciudad', 'Columna A', 'Columna B'].map(opt => (
+                          {['Todos los colaboradores en el análisis en el análisis', 'Área', 'Líder', 'País', 'Ciudad', 'Columna A', 'Columna B'].map(opt => (
                             <button
                               key={opt}
                               type="button"
@@ -1489,13 +1489,13 @@ export default function App() {
                       )}
                     </div>
 
-                    {alcance === 'Todos los colaboradores' && (
+                    {alcance === 'Todos los colaboradores en el análisis' && (
                       <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
                         <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                         </svg>
                         <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                          Se generarán reportes para los {getColaboradoresCount('Todos los colaboradores', '')} colaboradores analizados en el análisis actual.
+                          Se generarán reportes para los {getColaboradoresCount('Todos los colaboradores en el análisis', '')} colaboradores analizados en el análisis actual.
                         </p>
                       </div>
                     )}
