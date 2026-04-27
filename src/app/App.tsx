@@ -1588,7 +1588,7 @@ export default function App() {
                           </svg>
                           <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
                             Se generarán reportes para los {getColaboradoresCount(alcance, alcanceFieldValue)} colaboradores
-                            {alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad'} seleccionado.
+                            {alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad'} seleccionado dentro del análisis actual.
                           </p>
                         </div>
                       )}
