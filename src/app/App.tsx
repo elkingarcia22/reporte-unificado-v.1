@@ -2082,7 +2082,11 @@ export default function App() {
                 <p className="font-['Noto_Sans:Regular',sans-serif] text-[#8B4545] text-xs leading-tight">{errorNotification.message}</p>
               </div>
               <button
-                onClick={() => setErrorNotification(null)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setErrorNotification(null);
+                }}
                 className="text-[#D92D20] hover:text-[#A71E17] transition-colors flex-shrink-0 self-start"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
