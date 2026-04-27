@@ -27,7 +27,7 @@ export default function App() {
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [showAnalysisList, setShowAnalysisList] = useState(true);
-  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error' }>>([]);
+  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [showDrawerCancelAllConfirm, setShowDrawerCancelAllConfirm] = useState(false);
   const [cancelConfirmReportId, setCancelConfirmReportId] = useState<number | null>(null);
@@ -236,7 +236,8 @@ export default function App() {
           id: Date.now(),
           name: 'Reporte_Ejecutivo_Individual.pdf',
           progress: 100,
-          status: 'completed'
+          status: 'completed',
+          collaboratorCount: 1
         }
       ]);
     }
@@ -251,9 +252,10 @@ export default function App() {
     const reportName = `Reporte_Masivo_${reportId}.zip`;
 
     // Agregar nuevo reporte a la lista de descarga
+    const collaboratorCount = getColaboradoresCount(alcance, Array.isArray(alcanceFieldValue) ? alcanceFieldValue[0] : alcanceFieldValue);
     setDownloadingReports((prev) => [
       ...prev,
-      { id: reportId, name: reportName, progress: 0, status: 'downloading' }
+      { id: reportId, name: reportName, progress: 0, status: 'downloading', collaboratorCount }
     ]);
 
     setReportsInQueue((prev) => prev + 1);
@@ -449,7 +451,8 @@ export default function App() {
         id: Date.now(),
         name: 'Reporte_Ejecutivo_Individual.pdf',
         progress: 100,
-        status: 'completed'
+        status: 'completed',
+        collaboratorCount: 1
       }
     ]);
   };
@@ -1219,6 +1222,9 @@ export default function App() {
                               </div>
                               <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
                                 {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue.length > 0 ? alcanceFieldValue.join(', ') : 'Seleccionado'}`}
+                              </p>
+                              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mt-1">
+                                {report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
                               </p>
                             </>
                           )}
