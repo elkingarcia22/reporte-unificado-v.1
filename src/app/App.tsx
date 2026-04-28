@@ -1525,7 +1525,7 @@ export default function App() {
                       </button>
                       {openDropdown === 'alcance' && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-xl z-50 overflow-hidden">
-                          {['Todos los colaboradores en el análisis en el análisis', 'Área', 'Líder', 'País', 'Ciudad', 'Columna A', 'Columna B'].map(opt => (
+                          {['Todos los colaboradores en el análisis', 'Área', 'Líder', 'País', 'Ciudad', 'Columna A', 'Columna B'].map(opt => (
                             <button
                               key={opt}
                               type="button"

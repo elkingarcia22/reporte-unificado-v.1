@@ -32,15 +32,18 @@
 #### 2. **Vista de la Matriz de Talento**
 - Visualización de la matriz 9-box
 - Acciones principales en la cabecera (orden de izquierda a derecha):
-  1. **Generar reporte unificado** (Botón primario, azul)
-  2. **Descargar** (Botón secundario, blanco, con etiqueta y menú dropdown)
-  3. **Editar** (Icono de edición)
-  4. **Eliminar** (Icono de eliminación)
+  1. **Descargar reportes** (Botón primario, azul, con icono de descarga y menú dropdown)
+     - Opción 1: **Resultados del análisis** (PDF)
+     - Opción 2: **Reporte unificado** (ZIP)
+  2. **Editar** (Icono de edición)
+  3. **Eliminar** (Icono de eliminación)
 
-#### 3. **Pantalla de Generación de Reportes (Drawer)**
-- Formulario de entrada para reportes
-- Vista de descarga en progreso
-- Gestión de reportes descargados
+#### 3. **Pantalla de Generación de Reportes (Drawer: "Crear Reporte Unificado")**
+- **Tab: Generar reporte**: Formulario de entrada para reportes (Individual o Masivo)
+- **Tab: Descargas**: 
+  - Gestión de reportes en progreso (con barra de progreso azul)
+  - Historial de descargas recientes
+  - Banner de error para casos específicos (Análisis ID 2)
 
 ---
 
@@ -64,7 +67,10 @@
    - Peso Objetivos: 50
 
 3. **Generación**
-   - Click en "Generar reporte"
+   - Click en el botón **"Descargar reportes"** (cabecera)
+   - Seleccionar **"Resultados del análisis"** en el dropdown
+   - Se abre el drawer **"Crear Reporte Unificado"**
+   - Configurar pesos y click en **"Generar reporte"** (dentro del drawer)
    - Sistema inicia descarga automática
    - Panel de progreso aparece en esquina inferior derecha
 
@@ -1042,8 +1048,9 @@ Cierre: Click fuera o botón cerrar
 ### Checklist de Funcionalidades
 
 - [ ] **Análisis Q2 2025 - Happy Path**
-  - [ ] Individual: Generar y descargar (exitoso)
-  - [ ] Masivo Todos los colaboradores: Generar 10 reportes (exitosos)
+  - [ ] Cabecera: Botón "Descargar reportes" abre dropdown correctamente
+  - [ ] Individual: Seleccionar colaborador y generar (exitoso)
+  - [ ] Masivo Todos los colaboradores: Generar reportes (exitosos)
   - [ ] Masivo Área: Dropdown carga correctamente
   - [ ] Masivo Líder: Validar datos
   - [ ] Masivo País: Validar datos
@@ -1185,7 +1192,8 @@ Cierre: Click fuera o botón cerrar
 - ✨ Mensajes dinámicos que se adaptan a singular/plural automáticamente
 - ✨ Dropdown permanece abierto durante multiselect para mejor UX
 - ✨ Botón dinámico mostrando cantidad de selecciones
-- 🔄 Actualización de términología: "Toda la empresa" → "Todos los colaboradores en el análisis"
+- 🔄 Refactorización de cabecera: Unificación en botón primario "Descargar reportes"
+- 🔄 Actualización de terminología: "Toda la empresa" → "Todos los colaboradores en el análisis"
 - 📝 Matriz de casos de prueba expandida con 11 nuevos casos de multiselect
 
 ---
