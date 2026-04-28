@@ -23,18 +23,14 @@ export default function App() {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadMinimized, setIsDownloadMinimized] = useState(false);
+  const [showDownloadPanel, setShowDownloadPanel] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
   const [showReportOptions, setShowReportOptions] = useState(false);
   const [reportsInQueue, setReportsInQueue] = useState(0);
-  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
-  const [isCancelled, setIsCancelled] = useState(false);
   const [showAnalysisList, setShowAnalysisList] = useState(true);
   const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number; isIndividual?: boolean }>>([]);
   const [downloadHistory, setDownloadHistory] = useState<Array<{ id: number; name: string; completedAt: Date; collaboratorCount: number; isIndividual?: boolean }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [showDrawerCancelAllConfirm, setShowDrawerCancelAllConfirm] = useState(false);
-  const [cancelConfirmReportId, setCancelConfirmReportId] = useState<number | null>(null);
-  const [pendingCancelReportId, setPendingCancelReportId] = useState<number | null>(null);
   const [errorNotification, setErrorNotification] = useState<{
     title: string;
     message: string;
@@ -255,6 +251,7 @@ export default function App() {
       // Mostrar progreso dentro del drawer e iniciar descarga
       setShowReportOptions(true);
       setActiveDrawerTab('descargas');
+      setShowDownloadPanel(true);
       startMassiveDownload();
     } else {
       // Para individual, abrir previsualizador en nueva pestaña y mostrar estado en drawer
@@ -264,6 +261,7 @@ export default function App() {
       setShowReportOptions(true);
       setActiveDrawerTab('descargas');
       setIsDownloading(true);
+      setShowDownloadPanel(true);
       setDownloadComplete(true);
       setDownloadingReports([
         {
@@ -281,7 +279,7 @@ export default function App() {
   const startMassiveDownload = () => {
     setIsDownloading(true);
     setIsDownloadMinimized(false);
-    setIsCancelled(false);
+    setShowDownloadPanel(true);
 
     const reportId = Date.now();
     const reportName = `Reporte_Masivo_${reportId}.zip`;
@@ -332,118 +330,18 @@ export default function App() {
   };
 
   const handleCloseDownload = () => {
-    // Si está descargando y no está completo, mostrar confirmación
-    if (isDownloading && !downloadComplete && !isCancelled) {
-      setShowCancelConfirmation(true);
-    } else {
-      // Si ya está completo o fue cancelado, cerrar directamente
-      setIsDownloading(false);
-      setDownloadProgress(0);
-      setDownloadComplete(false);
-      setIsDownloadMinimized(false);
-      setReportsInQueue(0);
-      setDownloadingReports([]);
-      setIsCancelled(false);
-      setShowCancelConfirmation(false);
-    }
+    // Cerrar panel flotante sin cancelar descargas
+    setShowDownloadPanel(false);
+    setIsDownloadMinimized(false);
   };
 
-  const handleConfirmCancel = () => {
-    if (pendingCancelReportId !== null) {
-      const stopFailed = isErrorDemoMode;
-      if (stopFailed) {
-        setPendingCancelReportId(null);
-        setShowCancelConfirmation(false);
-        setErrorNotification({
-          title: 'No pudimos detener esta descarga',
-          message: 'Algo impidió detener el proceso. Intenta de nuevo desde la lista de reportes.',
-          actionLabel: 'Entendido',
-          onAction: () => setErrorNotification(null)
-        });
-        return;
-      }
-      // Cancelar solo el reporte individual
-      setDownloadingReports((prev) => {
-        const updated = prev.filter((r) => r.id !== pendingCancelReportId);
-        if (updated.length === 0) {
-          setIsDownloading(false);
-          setDownloadComplete(false);
-          setReportsInQueue(0);
-          setIsDownloadMinimized(false);
-        } else {
-          const allCompleted = updated.every((r) => r.status === 'completed');
-          if (allCompleted) setDownloadComplete(true);
-        }
-        return updated;
-      });
-      setPendingCancelReportId(null);
-    } else {
-      const cancelAllFailed = isErrorDemoMode;
-      if (cancelAllFailed) {
-        setShowCancelConfirmation(false);
-        setShowDrawerCancelAllConfirm(false);
-        setErrorNotification({
-          title: 'No pudimos cancelar todas las descargas',
-          message: 'Hubo un problema al intentar detener los procesos. Algunas descargas pueden seguir en progreso.',
-          actionLabel: 'Reintentar',
-          onAction: () => {
-            setPendingCancelReportId(null);
-            handleConfirmCancel();
-          }
-        });
-        return;
-      }
-      // Cancelar todas las descargas
-      setIsCancelled(true);
-      setIsDownloading(false);
-      setDownloadProgress(0);
-      setDownloadComplete(false);
-      setIsDownloadMinimized(false);
-      setReportsInQueue(0);
-      setDownloadingReports([]);
-    }
-    setShowCancelConfirmation(false);
-    setShowDrawerCancelAllConfirm(false);
-  };
-
-  const handleCancelSingleReport = (id: number) => {
-    const stopFailed = isErrorDemoMode;
-    if (stopFailed) {
-      setCancelConfirmReportId(null);
-      setErrorNotification({
-        title: 'No pudimos detener esta descarga',
-        message: 'El sistema no pudo interrumpirla en este momento. Intenta de nuevo en unos segundos.',
-        actionLabel: 'Reintentar',
-        onAction: () => handleCancelSingleReport(id)
-      });
-      return;
-    }
-    setDownloadingReports((prev) => {
-      const updated = prev.filter((r) => r.id !== id);
-      if (updated.length === 0) {
-        setIsDownloading(false);
-        setDownloadComplete(false);
-        setReportsInQueue(0);
-        setShowReportOptions(false);
-      } else {
-        const allCompleted = updated.every((r) => r.status === 'completed');
-        if (allCompleted) setDownloadComplete(true);
-      }
-      return updated;
-    });
-    setCancelConfirmReportId(null);
-  };
-
-  const handleKeepDownloading = () => {
-    setShowCancelConfirmation(false);
-  };
 
   const handleOpenFolder = () => {
     const failed = isErrorDemoMode && Math.random() < 0.35;
     if (failed) {
       setErrorNotification({
-        title: 'No podemos abrir la carpeta',
-        message: 'Es posible que los archivos hayan sido movidos o que tu sistema no permita abrirla en este momento.',
+        title: 'Error al abrir carpeta',
+        message: 'Error al abrir la carpeta. Inténtalo más tarde.',
         actionLabel: 'Reintentar',
         onAction: handleOpenFolder
       });
@@ -1192,27 +1090,7 @@ export default function App() {
 
                               return (
                                 <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
-                                  {cancelConfirmReportId === report.id ? (
-                                    <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-3">
-                                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-3">
-                                        ¿Detener la descarga de <span className="font-['Noto_Sans:Bold',sans-serif]">{report.name}</span>?
-                                      </p>
-                                      <div className="flex gap-2">
-                                        <button
-                                          onClick={() => handleCancelSingleReport(report.id)}
-                                          className="flex-1 bg-[#D92D20] text-white px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#B42318] transition-colors"
-                                        >
-                                          Sí, detener
-                                        </button>
-                                        <button
-                                          onClick={() => setCancelConfirmReportId(null)}
-                                          className="flex-1 bg-white text-[#303A47] px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                                        >
-                                          No, continuar
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ) : isError ? (
+                                  {isError ? (
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2 flex-1 min-w-0">
                                         <div className="w-5 h-5 rounded-full bg-[#D92D20] flex items-center justify-center flex-shrink-0">
@@ -1264,15 +1142,6 @@ export default function App() {
                                               <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
                                                 {report.progress}%
                                               </p>
-                                              <button
-                                                onClick={() => setCancelConfirmReportId(report.id)}
-                                                className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
-                                                title="Detener descarga"
-                                              >
-                                                <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                                                  <path d="M6 6h12v12H6z"/>
-                                                </svg>
-                                              </button>
                                             </>
                                           )}
                                         </div>
@@ -1309,57 +1178,12 @@ export default function App() {
                     {/* Opciones de acción unificadas */}
                     {!(selectedAnalysisId === 2 && downloadingReports.length === 0 && getRecentDownloadHistory().length === 0) && (
                       <div className="space-y-3">
-                        {showDrawerCancelAllConfirm ? (
-                          /* Confirmación inline cancelar todo */
-                          <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-4">
-                            <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-1">
-                              ¿Cancelar todas las descargas en progreso?
-                            </p>
-                            <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mb-3">
-                              Esta acción no se puede deshacer.
-                            </p>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleConfirmCancel}
-                                className="flex-1 bg-[#D92D20] text-white px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm hover:bg-[#B42318] transition-colors"
-                              >
-                                Sí, cancelar todo
-                              </button>
-                              <button
-                                onClick={() => setShowDrawerCancelAllConfirm(false)}
-                                className="flex-1 bg-white text-[#303A47] px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                              >
-                                No, continuar
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <button
-                              onClick={handleExitAndDownload}
-                              className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                            >
-                              Minimizar y continuar
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (isDownloading) {
-                                  setShowDrawerCancelAllConfirm(true);
-                                } else {
-                                  // Si no está descargando, el botón actúa como "Limpiar historial" o similar
-                                  // Pero conservamos el estilo y acción de "cancelar/limpiar"
-                                  handleConfirmCancel();
-                                }
-                              }}
-                              className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 6h12v12H6z"/>
-                              </svg>
-                              {isDownloading ? 'Cancelar descarga' : 'Limpiar historial'}
-                            </button>
-                          </>
-                        )}
+                          <button
+                            onClick={handleExitAndDownload}
+                            className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                          >
+                            Minimizar y continuar
+                          </button>
                       </div>
                     )}
                   </>
@@ -1843,7 +1667,7 @@ export default function App() {
       )}
 
       {/* Panel de progreso de descarga masiva */}
-      {isDownloading && !isDrawerOpen && !isDownloadMinimized && (
+      {showDownloadPanel && !isDrawerOpen && !isDownloadMinimized && (
         <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50 max-h-[500px] flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#D0D2D5] flex-shrink-0">
@@ -1890,9 +1714,9 @@ export default function App() {
 
               {/* Botón Cerrar (SIEMPRE VISIBLE) */}
               <button
-                onClick={() => { setPendingCancelReportId(null); handleCloseDownload(); }}
+                onClick={() => handleCloseDownload()}
                 className="p-1.5 hover:bg-[#F3F3F4] rounded transition-colors group"
-                title={downloadComplete ? 'Cerrar' : 'Detener descarga'}
+                title="Cerrar"
               >
                 <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#D92D20] transition-colors" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -1951,17 +1775,6 @@ export default function App() {
                             <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
                               {report.progress}%
                             </p>
-                            {report.status === 'downloading' && (
-                              <button
-                                onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
-                                className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
-                                title="Detener descarga"
-                              >
-                                <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M6 6h12v12H6z"/>
-                                </svg>
-                              </button>
-                            )}
                           </div>
                         </div>
                         {report.status !== 'completed' && (
@@ -1987,7 +1800,7 @@ export default function App() {
         </div>
       )}
 
-      {isDownloading && !isDrawerOpen && isDownloadMinimized && (
+      {showDownloadPanel && !isDrawerOpen && isDownloadMinimized && (
         <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
@@ -2059,45 +1872,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Modal de confirmación para cancelar descarga */}
-      {showCancelConfirmation && (() => {
-        return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
-          <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl border-0">
-            <div className="flex gap-3 mb-4">
-              <div className="bg-[#FDEAEA] rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base mb-1">
-                  ¿Detener descarga?
-                </h3>
-                <p className="font-['Noto_Sans:Regular',sans-serif] text-[#5C646F] text-sm">
-                  Si te detienes ahora, los reportes en progreso no se guardarán.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleKeepDownloading}
-                className="flex-1 bg-white text-[#303A47] px-3 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-xs border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors whitespace-nowrap"
-              >
-                Seguir descargando
-              </button>
-              <button
-                onClick={handleConfirmCancel}
-                className="flex-1 bg-[#D92D20] text-white px-3 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-xs hover:bg-[#BA2318] transition-colors whitespace-nowrap"
-              >
-                Detener descarga
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-      })()}
 
       {/* Toast de error - Centrado abajo, compacto */}
       {errorNotification && (
