@@ -5,7 +5,9 @@ import VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef from '../imports/Vista
 
 export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [reportType, setReportType] = useState<'Individual' | 'Masivo'>('Individual');
+  const [reportType, setReportType] = useState<'Individual' | 'Masivo' | 'AnalisisMatriz'>('Individual');
+  const [drawerTitle, setDrawerTitle] = useState('Reporte Unificado');
+  const [activeDrawerTab, setActiveDrawerTab] = useState<'generar' | 'descargas'>('generar');
   const [alcance, setAlcance] = useState('Todos los colaboradores en el análisis');
   const [peso360, setPeso360] = useState('50');
   const [pesoObjetivos, setPesoObjetivos] = useState('50');
@@ -28,6 +30,7 @@ export default function App() {
   const [isCancelled, setIsCancelled] = useState(false);
   const [showAnalysisList, setShowAnalysisList] = useState(true);
   const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number; isIndividual?: boolean }>>([]);
+  const [downloadHistory, setDownloadHistory] = useState<Array<{ id: number; name: string; completedAt: Date; collaboratorCount: number; isIndividual?: boolean }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [showDrawerCancelAllConfirm, setShowDrawerCancelAllConfirm] = useState(false);
   const [cancelConfirmReportId, setCancelConfirmReportId] = useState<number | null>(null);
@@ -71,6 +74,24 @@ export default function App() {
     }
   }, [errorNotification]);
 
+  // Agregar reportes completados al historial
+  useEffect(() => {
+    downloadingReports.forEach((report) => {
+      if (report.status === 'completed' && !downloadHistory.some((h) => h.id === report.id)) {
+        setDownloadHistory((prev) => [
+          ...prev,
+          {
+            id: report.id,
+            name: report.name,
+            completedAt: new Date(),
+            collaboratorCount: report.collaboratorCount,
+            isIndividual: report.isIndividual
+          }
+        ]);
+      }
+    });
+  }, [downloadingReports, downloadHistory]);
+
   const isErrorDemoMode = selectedAnalysisId === 2;
 
   const colaboradores = [
@@ -104,6 +125,13 @@ export default function App() {
       return colaboradores.filter(c => c.ciudad === fieldValue).length;
     }
     return 0;
+  };
+
+  // Filtrar historial de descargas de los últimos 7 días
+  const getRecentDownloadHistory = () => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return downloadHistory.filter((item) => new Date(item.completedAt) > sevenDaysAgo);
   };
 
   const filteredColaboradores = searchTerm
@@ -222,6 +250,7 @@ export default function App() {
     if (reportType === 'Masivo') {
       // Mostrar progreso dentro del drawer e iniciar descarga
       setShowReportOptions(true);
+      setActiveDrawerTab('descargas');
       startMassiveDownload();
     } else {
       // Para individual, abrir previsualizador en nueva pestaña y mostrar estado en drawer
@@ -229,6 +258,7 @@ export default function App() {
 
       // Mostrar estado de reporte en cola en el drawer
       setShowReportOptions(true);
+      setActiveDrawerTab('descargas');
       setIsDownloading(true);
       setDownloadComplete(true);
       setDownloadingReports([
@@ -601,33 +631,18 @@ export default function App() {
 
           {/* Grupo de botones de acción */}
           <div className="flex gap-2 items-center">
-            {/* Botón Generar reporte unificado */}
-            <button
-              onClick={() => setIsDrawerOpen(true)}
-              className="bg-[#0C5BEF] flex items-center px-4 py-2 rounded-[5px] shrink-0 hover:bg-[#0A4BC7] transition-colors cursor-pointer"
-            >
-              <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-                </svg>
-                <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                  <p className="leading-6">Generar reporte unificado</p>
-                </div>
-              </div>
-            </button>
-
             {/* Botón Descargar con label y dropdown */}
             <div className="relative" ref={downloadRef}>
               <button
                 onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-                className="bg-white flex items-center px-3 py-2 rounded-[5px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
+                className="bg-[#0C5BEF] flex items-center px-4 py-2 rounded-[5px] shrink-0 hover:bg-[#0A4BC7] transition-colors cursor-pointer"
               >
-                <div className="flex gap-2.5 items-center text-[#5C646F] text-base whitespace-nowrap">
+                <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
                   </svg>
-                  <div className="font-['Helvetica_Now_Text_:Regular',sans-serif]">
-                    <p className="leading-6">Descargar</p>
+                  <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                    <p className="leading-6">Descargar reporte</p>
                   </div>
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M7 10l5 5 5-5z"/>
@@ -641,7 +656,9 @@ export default function App() {
                   <button
                     onClick={() => {
                       setShowDownloadMenu(false);
-                      // Acción de descargar reporte individual
+                      setActiveDrawerTab('generar');
+                      setReportType('Individual');
+                      setIsDrawerOpen(true);
                     }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left"
                   >
@@ -650,7 +667,7 @@ export default function App() {
                     </svg>
                     <div className="flex-1">
                       <p className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm text-[#303A47]">
-                        Reporte individual
+                        Resultados del análisis
                       </p>
                       <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
                         Descargar como PDF
@@ -660,7 +677,9 @@ export default function App() {
                   <button
                     onClick={() => {
                       setShowDownloadMenu(false);
-                      // Acción de descargar reporte masivo
+                      setActiveDrawerTab('generar');
+                      setReportType('Individual');
+                      setIsDrawerOpen(true);
                     }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left"
                   >
@@ -669,7 +688,7 @@ export default function App() {
                     </svg>
                     <div className="flex-1">
                       <p className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm text-[#303A47]">
-                        Reporte masivo
+                        Reporte unificado
                       </p>
                       <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
                         Descargar como ZIP
@@ -1070,10 +1089,10 @@ export default function App() {
             className="fixed top-0 right-0 h-full w-[440px] bg-white shadow-2xl z-[101] flex flex-col animate-[slideInRight_0.3s_ease-in-out]"
           >
             {/* Header */}
-            <div className="px-6 py-5 border-b border-[#D0D2D5]">
+            <div className="px-6 py-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl flex-1">
-                  {showReportOptions ? 'Reporte en cola' : 'Crear Reporte Unificado'}
+                  {drawerTitle}
                 </h2>
                 <button
                   onClick={() => handleCloseDrawer()}
@@ -1085,266 +1104,293 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Progreso de descarga en el header - solo cuando hay descargas activas y estamos en vista de formulario */}
-              {isDownloading && !downloadComplete && !showReportOptions && downloadingReports.length > 0 && (() => {
-                const avgProgress = Math.round(downloadingReports.reduce((sum, r) => sum + r.progress, 0) / downloadingReports.length);
-                const inProgress = downloadingReports.filter(r => r.status !== 'completed').length;
-                return (
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
-                        <span className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                          {inProgress > 0 ? `${inProgress} elemento${inProgress > 1 ? 's' : ''} en cola` : 'Finalizando...'}
-                        </span>
-                      </div>
-                      <span className="font-['Noto_Sans:Bold',sans-serif] text-xs text-[#0C5BEF]">{avgProgress}%</span>
-                    </div>
-                    <div className="w-full bg-[#E7E8EA] rounded-full h-1 overflow-hidden">
-                      <div
-                        className="bg-[#0C5BEF] h-full transition-all duration-300 rounded-full"
-                        style={{ width: `${avgProgress}%` }}
-                      />
-                    </div>
-                    <button
-                      onClick={() => setShowReportOptions(true)}
-                      className="text-xs text-[#0C5BEF] hover:underline mt-1.5"
-                    >
-                      Ver detalle →
-                    </button>
-                  </div>
-                );
-              })()}
+              {/* Tabs del drawer */}
+              <div className="flex items-center mt-4 border-b border-[#D0D2D5]">
+                <button
+                  onClick={() => setActiveDrawerTab('generar')}
+                  className={`py-2.5 px-4 font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm transition-all border-b-2 ${
+                    activeDrawerTab === 'generar'
+                      ? 'text-[#0C5BEF] border-[#0C5BEF]'
+                      : 'text-[#5C646F] border-transparent hover:text-[#0C5BEF]'
+                  }`}
+                >
+                  Generar reporte
+                </button>
+                <button
+                  onClick={() => setActiveDrawerTab('descargas')}
+                  className={`py-2.5 px-4 font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm transition-all border-b-2 flex items-center gap-2 ${
+                    activeDrawerTab === 'descargas'
+                      ? 'text-[#0C5BEF] border-[#0C5BEF]'
+                      : 'text-[#5C646F] border-transparent hover:text-[#0C5BEF]'
+                  }`}
+                >
+                  Descargas
+                  {isDownloading && !downloadComplete && downloadingReports.length > 0 && (
+                    <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Content */}
-            {showReportOptions ? (
-              // Vista de progreso de descarga - Lista de reportes
+            {activeDrawerTab === 'descargas' ? (
               <div className="flex-1 flex flex-col px-6 py-6 overflow-hidden">
-                {/* Encabezado con info */}
-                <div className="mb-4">
-                  <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base">
-                    Descargas
-                  </h3>
-                </div>
-
-                {/* Lista de reportes descargando */}
-                <div className="flex-1 overflow-y-auto mb-4">
-                  {downloadingReports.length > 0 ? (
-                    <div className="space-y-3">
-                      {downloadingReports.map((report) => (
-                        <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
-                          {cancelConfirmReportId === report.id ? (
-                            /* Confirmación inline por reporte */
-                            <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-3">
-                              <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-3">
-                                ¿Detener la descarga de <span className="font-['Noto_Sans:Bold',sans-serif]">{report.name}</span>?
-                              </p>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleCancelSingleReport(report.id)}
-                                  className="flex-1 bg-[#D92D20] text-white px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#B42318] transition-colors"
-                                >
-                                  Sí, detener
-                                </button>
-                                <button
-                                  onClick={() => setCancelConfirmReportId(null)}
-                                  className="flex-1 bg-white text-[#303A47] px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                                >
-                                  No, continuar
-                                </button>
-                              </div>
-                            </div>
-                          ) : report.status === 'error' ? (
-                            // Error state: only name, icon, and retry button
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <div className="w-5 h-5 rounded-full bg-[#D92D20] flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                                  </svg>
-                                </div>
-                                <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                                  {report.name}
-                                </p>
-                              </div>
-                              <button
-                                onClick={() => handleRetryReport(report.id)}
-                                className="text-xs text-[#0C5BEF] hover:underline font-['Noto_Sans:Regular',sans-serif] whitespace-nowrap ml-2 flex-shrink-0"
-                              >
-                                Reintentar
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  {report.status === 'completed' ? (
-                                    <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
-                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                                      </svg>
-                                    </div>
-                                  ) : (
-                                    <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                  )}
-                                  <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                                    {report.name}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                                  <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
-                                    {report.progress}%
-                                  </p>
-                                  {report.status === 'downloading' && (
-                                    <button
-                                      onClick={() => setCancelConfirmReportId(report.id)}
-                                      className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
-                                      title="Detener descarga"
-                                    >
-                                      <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M6 6h12v12H6z"/>
-                                      </svg>
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                              {/* Barra de progreso */}
-                              <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden mb-2">
-                                <div
-                                  className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                                  style={{ width: `${report.progress}%` }}
-                                />
-                              </div>
-                              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                                {!report.isIndividual ? (
-                                  <>
-                                    {alcance === 'Todos los colaboradores en el análisis' ? 'todos los colaboradores en el análisis' : `${alcance}: ${alcanceFieldValue.length > 0 ? alcanceFieldValue.join(', ') : 'Seleccionado'}`}
-                                    {' - '}
-                                    {report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
-                                  </>
-                                ) : (
-                                  `${report.collaboratorCount} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`
-                                )}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      ))}
+                {downloadingReports.length > 0 || getRecentDownloadHistory().length > 0 ? (
+                  <>
+                    {/* Encabezado con info */}
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-base">
+                        Lista de descargas
+                      </h3>
+                      <span className="px-2 py-1 bg-[#F3F3F4] text-[#5C646F] rounded text-[10px] font-['Helvetica_Now_Text_:Bold',sans-serif] uppercase tracking-wider">
+                        Últimos 7 días
+                      </span>
                     </div>
-                  ) : (
-                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] text-center py-8">
-                      No hay reportes en descarga
-                    </p>
-                  )}
-                </div>
 
-                {/* Mensaje de estado */}
-                {!downloadComplete ? (
-                  <div className="bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2 mb-4">
-                    <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                    </svg>
-                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                      La descarga está en progreso. Puedes seguir generando reportes o minimizar esta ventana.
-                    </p>
-                  </div>
-                ) : downloadingReports.some(r => r.status === 'error') ? null : (
-                  <div className="bg-[#F0F9F7] border border-[#10B981] rounded-lg p-3 flex gap-2 mb-4">
-                    <svg className="w-5 h-5 text-[#10B981] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                    </svg>
-                    <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#065F46]">
-                      Reportes generados y descargados. Listos para visualizar.
-                    </p>
-                  </div>
-                )}
+                    {/* Lista de reportes descargando e historial */}
+                    <div className="flex-1 overflow-y-auto mb-4">
+                      <div className="space-y-3">
+                        {/* Lista unificada: activos (solo en progreso/error) + historial */}
+                        {(() => {
+                          const history = getRecentDownloadHistory();
+                          const historyIds = new Set(history.map(h => h.id));
+                          const activeFiltered = downloadingReports.filter(r => !historyIds.has(r.id));
+                          const unified = [...activeFiltered, ...history].sort((a: any, b: any) => (b.id || 0) - (a.id || 0));
 
-                {/* Opciones de acción */}
-                <div className="space-y-3">
-                  {showDrawerCancelAllConfirm ? (
-                    /* Confirmación inline cancelar todo */
-                    <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-4">
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-1">
-                        ¿Cancelar todas las descargas en progreso?
+                          return unified.map((item, index) => {
+                            const isHistory = 'completedAt' in item;
+                            const report = item as any;
+                            const isCompleted = isHistory || report.status === 'completed';
+                            const isError = report.status === 'error';
+
+                            return (
+                              <div key={report.id} className="py-1">
+                                {cancelConfirmReportId === report.id ? (
+                                  /* Confirmación inline por reporte */
+                                  <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-3 my-2">
+                                    <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-3">
+                                      ¿Detener la descarga de <span className="font-['Noto_Sans:Bold',sans-serif]">{report.name}</span>?
+                                    </p>
+                                    <div className="flex gap-2">
+                                      <button
+                                        onClick={() => handleCancelSingleReport(report.id)}
+                                        className="flex-1 bg-[#D92D20] text-white px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#B42318] transition-colors"
+                                      >
+                                        Sí, detener
+                                      </button>
+                                      <button
+                                        onClick={() => setCancelConfirmReportId(null)}
+                                        className="flex-1 bg-white text-[#303A47] px-3 py-2 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                                      >
+                                        No, continuar
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : isError ? (
+                                  // Error state
+                                  <div className="flex items-center justify-between py-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div className="w-5 h-5 rounded-full bg-[#D92D20] flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                        </svg>
+                                      </div>
+                                      <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                        {report.name}
+                                      </p>
+                                    </div>
+                                    <button
+                                      onClick={() => handleRetryReport(report.id)}
+                                      className="text-xs text-[#0C5BEF] hover:underline font-['Noto_Sans:Regular',sans-serif] whitespace-nowrap ml-2 flex-shrink-0"
+                                    >
+                                      Reintentar
+                                    </button>
+                                  </div>
+                                ) : isCompleted ? (
+                                  // Layout UNIFICADO de UNA SOLA LÍNEA para completados e historial
+                                  <div className="flex items-center justify-between py-1 group">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                                        </svg>
+                                      </div>
+                                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                          {report.name}
+                                        </p>
+                                        <span className="font-['Noto_Sans:Regular',sans-serif] text-[11px] text-[#5C646F] whitespace-nowrap opacity-70 group-hover:opacity-100 transition-opacity">
+                                          ({report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'})
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => {
+                                        // Simular descarga
+                                        const element = document.createElement('a');
+                                        element.href = '#';
+                                        element.download = report.name;
+                                        element.click();
+                                      }}
+                                      className="text-xs text-[#0C5BEF] hover:underline font-['Noto_Sans:Bold',sans-serif] whitespace-nowrap ml-2 flex-shrink-0"
+                                      title="Descargar"
+                                    >
+                                      Descargar
+                                    </button>
+                                  </div>
+                                ) : (
+                                  // Layout con barra de progreso para descargas activas (en progreso)
+                                  <div className="py-2">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                          {report.name}
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                                        <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
+                                          {report.progress}%
+                                        </p>
+                                        <button
+                                          onClick={() => setCancelConfirmReportId(report.id)}
+                                          className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
+                                          title="Detener descarga"
+                                        >
+                                          <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M6 6h12v12H6z"/>
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden mb-1">
+                                      <div
+                                        className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                                        style={{ width: `${report.progress}%` }}
+                                      />
+                                    </div>
+                                    <p className="font-['Noto_Sans:Regular',sans-serif] text-[11px] text-[#5C646F] ml-7">
+                                      {report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          });
+                        })()}
+                      </div>
+                      <p className="mt-4 text-center font-['Noto_Sans:Regular',sans-serif] text-[11px] text-[#A0A5AD]">
+                        Los reportes se conservan automáticamente por 7 días.
                       </p>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mb-3">
-                        Esta acción no se puede deshacer.
+                    </div>
+
+                    {/* Mensaje de estado unificado */}
+                    <div className={`${isDownloading ? 'bg-[#E7F0FF] border-[#A2C4FF]' : 'bg-[#F0F9F7] border-[#10B981]'} border rounded-lg p-3 flex gap-2 mb-4 transition-colors duration-300`}>
+                      <svg className={`w-5 h-5 ${isDownloading ? 'text-[#0C5BEF]' : 'text-[#10B981]'} shrink-0 mt-0.5`} fill="currentColor" viewBox="0 0 24 24">
+                        {isDownloading ? (
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        ) : (
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        )}
+                      </svg>
+                      <p className={`font-['Noto_Sans:Regular',sans-serif] text-xs ${isDownloading ? 'text-[#303A47]' : 'text-[#065F46]'}`}>
+                        {isDownloading 
+                          ? 'La descarga está en progreso. Puedes seguir generando reportes o minimizar esta ventana.' 
+                          : 'Reportes generados y descargados. Listos para visualizar.'}
                       </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleConfirmCancel}
-                          className="flex-1 bg-[#D92D20] text-white px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm hover:bg-[#B42318] transition-colors"
-                        >
-                          Sí, cancelar todo
-                        </button>
-                        <button
-                          onClick={() => setShowDrawerCancelAllConfirm(false)}
-                          className="flex-1 bg-white text-[#303A47] px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                        >
-                          No, continuar
-                        </button>
+                    </div>
+
+                    {/* Opciones de acción unificadas */}
+                    <div className="space-y-3">
+                      {showDrawerCancelAllConfirm ? (
+                        /* Confirmación inline cancelar todo */
+                        <div className="bg-[#FFF4F2] border border-[#FECDC9] rounded-lg p-4">
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] mb-1">
+                            ¿Cancelar todas las descargas en progreso?
+                          </p>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F] mb-3">
+                            Esta acción no se puede deshacer.
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleConfirmCancel}
+                              className="flex-1 bg-[#D92D20] text-white px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm hover:bg-[#B42318] transition-colors"
+                            >
+                              Sí, cancelar todo
+                            </button>
+                            <button
+                              onClick={() => setShowDrawerCancelAllConfirm(false)}
+                              className="flex-1 bg-white text-[#303A47] px-3 py-2.5 rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                            >
+                              No, continuar
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={handleExitAndDownload}
+                            className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
+                          >
+                            Minimizar y continuar
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (isDownloading) {
+                                setShowDrawerCancelAllConfirm(true);
+                              } else {
+                                // Si no está descargando, el botón actúa como "Limpiar historial" o similar
+                                // Pero conservamos el estilo y acción de "cancelar/limpiar"
+                                handleConfirmCancel();
+                              }
+                            }}
+                            className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M6 6h12v12H6z"/>
+                            </svg>
+                            {isDownloading ? 'Cancelar descarga' : 'Limpiar historial'}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center py-12 px-4 text-center">
+                    <div className="mb-6 relative">
+                      <div className="w-24 h-24 bg-[#F3F7FF] rounded-full flex items-center justify-center animate-[float_4s_ease-in-out_infinite]">
+                        <svg className="w-12 h-12 text-[#0C5BEF] opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                        </svg>
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center">
+                        <svg className="w-4 h-4 text-[#A0A5AD]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                       </div>
                     </div>
-                  ) : downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
-                    <>
-                      <button
-                        onClick={handleOpenFolder}
-                        className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
-                        </svg>
-                        Abrir carpeta de descargas
-                      </button>
-                      <button
-                        onClick={handleContinueGenerating}
-                        className="w-full bg-white text-[#0C5BEF] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#0C5BEF] hover:bg-[#F3F3F4] transition-colors"
-                      >
-                        Generar más reportes
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={handleContinueGenerating}
-                        className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-colors"
-                      >
-                        Generar más reportes
-                      </button>
-                      <button
-                        onClick={handleExitAndDownload}
-                        className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
-                      >
-                        Minimizar y continuar
-                      </button>
-                      <button
-                        onClick={() => setShowDrawerCancelAllConfirm(true)}
-                        className="w-full bg-white text-[#D92D20] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D92D20] hover:bg-[#FDEAEA] transition-colors flex items-center justify-center gap-2"
-                      >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M6 6h12v12H6z"/>
-                        </svg>
-                        Cancelar descarga
-                      </button>
-                    </>
-                  )}
-
-                  {!showDrawerCancelAllConfirm && (
-                    <button
-                      onClick={() => handleCloseDrawer()}
-                      className="w-full text-[#5C646F] px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm hover:bg-[#F3F3F4] transition-colors"
-                    >
-                      Cerrar
-                    </button>
-                  )}
-                </div>
+                    <h4 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl mb-3">
+                      Sin descargas recientes
+                    </h4>
+                    <p className="font-['Noto_Sans:Regular',sans-serif] text-base text-[#5C646F] max-w-[280px] mb-8 leading-relaxed">
+                      Aquí aparecerán tus reportes generados en los <span className="font-['Noto_Sans:Bold',sans-serif] text-[#0C5BEF]">últimos 7 días</span>.
+                    </p>
+                    <div className="flex items-center gap-2 text-[#A0A5AD]">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs">
+                        Usa la pestaña "Generar reporte" para comenzar.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               // Vista de formulario original
@@ -1755,8 +1801,8 @@ export default function App() {
             </div>
             )}
 
-            {/* Footer Actions - Solo mostrar si no está en vista de opciones */}
-            {!showReportOptions && (
+            {/* Footer Actions - Solo mostrar si está en tab de generar reporte */}
+            {activeDrawerTab === 'generar' && (
               <div className="border-t border-[#D0D2D5] px-6 py-4 space-y-3">
                 <button
                   onClick={handleGenerateReport}
@@ -1811,8 +1857,21 @@ export default function App() {
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              {!downloadComplete && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setIsDrawerOpen(true);
+                    setActiveDrawerTab('descargas');
+                  }}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors group"
+                  title="Ver en el drawer"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#0C5BEF] transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </button>
                 <button
                   onClick={() => setIsDownloadMinimized(true)}
                   className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
@@ -1822,7 +1881,7 @@ export default function App() {
                     <path d="M6 9l6 6 6-6"/>
                   </svg>
                 </button>
-              )}
+
               <button
                 onClick={() => { setPendingCancelReportId(null); handleCloseDownload(); }}
                 className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
@@ -1840,7 +1899,7 @@ export default function App() {
             {downloadingReports.length > 0 ? (
               <div className="space-y-3">
                 {downloadingReports.map((report) => (
-                  <div key={report.id} className="pb-3 border-b border-[#E7E8EA] last:border-b-0">
+                  <div key={report.id} className="py-1">
                     {report.status === 'error' ? (
                       // Error state: only name, icon, and retry button
                       <div className="flex items-center justify-between">
@@ -1861,22 +1920,42 @@ export default function App() {
                           Reintentar
                         </button>
                       </div>
+                    ) : report.status === 'completed' ? (
+                      // Layout UNIFICADO de UNA SOLA LÍNEA para completados
+                      <div className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                            </svg>
+                          </div>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                            {report.name}
+                          </p>
+                          <span className="font-['Noto_Sans:Regular',sans-serif] text-[11px] text-[#5C646F] whitespace-nowrap opacity-70">
+                            ({report.collaboratorCount} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'})
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const element = document.createElement('a');
+                            element.href = '#';
+                            element.download = report.name;
+                            element.click();
+                          }}
+                          className="text-xs text-[#0C5BEF] hover:underline font-['Noto_Sans:Bold',sans-serif] whitespace-nowrap ml-2 flex-shrink-0"
+                        >
+                          Descargar
+                        </button>
+                      </div>
                     ) : (
                       <>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {report.status === 'completed' ? (
-                              <div className="w-5 h-5 rounded-full bg-[#17B26A] flex items-center justify-center flex-shrink-0">
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                                </svg>
-                              </div>
-                            ) : (
-                              <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                                <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                              </svg>
-                            )}
+                            <svg className="w-5 h-5 text-[#0C5BEF] animate-spin flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                              <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
                             <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
                               {report.name}
                             </p>
@@ -1885,27 +1964,23 @@ export default function App() {
                             <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
                               {report.progress}%
                             </p>
-                            {report.status === 'downloading' && (
-                              <button
-                                onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
-                                className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
-                                title="Detener descarga"
-                              >
-                                <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M6 6h12v12H6z"/>
-                                </svg>
-                              </button>
-                            )}
+                            <button
+                              onClick={() => { setPendingCancelReportId(report.id); setShowCancelConfirmation(true); }}
+                              className="w-5 h-5 rounded-full bg-[#F3F3F4] hover:bg-[#FDEAEA] flex items-center justify-center transition-colors group"
+                              title="Detener descarga"
+                            >
+                              <svg className="w-3 h-3 text-[#5C646F] group-hover:text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 6h12v12H6z"/>
+                              </svg>
+                            </button>
                           </div>
                         </div>
-                        {report.status !== 'completed' && (
-                          <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden ml-7" style={{ width: 'calc(100% - 1.75rem)' }}>
-                            <div
-                              className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
-                              style={{ width: `${report.progress}%` }}
-                            />
-                          </div>
-                        )}
+                        <div className="w-full bg-[#E7E8EA] rounded-full h-1.5 overflow-hidden ml-7" style={{ width: 'calc(100% - 1.75rem)' }}>
+                          <div
+                            className="bg-[#0C5BEF] h-full transition-all duration-300 ease-out rounded-full"
+                            style={{ width: `${report.progress}%` }}
+                          />
+                        </div>
                       </>
                     )}
                   </div>
@@ -1921,8 +1996,14 @@ export default function App() {
           {/* Footer Actions */}
           {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
             <div className="px-4 py-3 border-t border-[#D0D2D5] flex gap-2 flex-shrink-0">
-              <button onClick={handleOpenFolder} className="flex-1 bg-[#0C5BEF] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#0A4BC7] transition-colors">
-                Abrir carpeta
+              <button
+                onClick={() => {
+                  setIsDrawerOpen(true);
+                  setActiveDrawerTab('descargas');
+                }}
+                className="flex-1 bg-[#0C5BEF] text-white px-4 py-2 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm hover:bg-[#0A4BC7] transition-colors"
+              >
+                Ver descargas
               </button>
               <button
                 onClick={handleCloseDownload}
@@ -1942,7 +2023,7 @@ export default function App() {
       )}
 
       {/* Indicador minimizado de descarga - Google Drive style */}
-      {isDownloading && !isDrawerOpen && isDownloadMinimized && (!downloadComplete || downloadingReports.some(r => r.status === 'error')) && (
+      {isDownloading && !isDrawerOpen && isDownloadMinimized && (
         <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-2xl border border-[#D0D2D5] w-[400px] z-50">
           {downloadComplete && !downloadingReports.some(r => r.status === 'error') ? (
             // Versión completada sin errores
@@ -1958,6 +2039,21 @@ export default function App() {
                 </p>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setIsDrawerOpen(true);
+                    setActiveDrawerTab('descargas');
+                    setIsDownloadMinimized(false);
+                  }}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors group"
+                  title="Ver en el drawer"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#0C5BEF] transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </button>
                 <button
                   onClick={() => setIsDownloadMinimized(false)}
                   className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
@@ -1992,6 +2088,21 @@ export default function App() {
                 </p>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setIsDrawerOpen(true);
+                    setActiveDrawerTab('descargas');
+                    setIsDownloadMinimized(false);
+                  }}
+                  className="p-1 hover:bg-[#F3F3F4] rounded transition-colors group"
+                  title="Ver en el drawer"
+                >
+                  <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#0C5BEF] transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </button>
                 <button
                   onClick={() => setIsDownloadMinimized(false)}
                   className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
@@ -2034,8 +2145,21 @@ export default function App() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => {
+                      setIsDrawerOpen(true);
+                      setActiveDrawerTab('descargas');
                       setIsDownloadMinimized(false);
                     }}
+                    className="p-1 hover:bg-[#F3F3F4] rounded transition-colors group"
+                    title="Ver en el drawer"
+                  >
+                    <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#0C5BEF] transition-colors" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setIsDownloadMinimized(false)}
                     className="p-1 hover:bg-[#F3F3F4] rounded transition-colors"
                     title="Expandir"
                   >
