@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef from '../imports/VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef/VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef';
+import { MultiSelectDropdown } from '../components/MultiSelectDropdown';
 
 export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -12,7 +13,7 @@ export default function App() {
   const [peso360, setPeso360] = useState('50');
   const [pesoObjetivos, setPesoObjetivos] = useState('50');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedColaborador, setSelectedColaborador] = useState('');
+  const [selectedColaboradores, setSelectedColaboradores] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
@@ -102,7 +103,7 @@ export default function App() {
     { id: 7, name: 'Carlos Martínez Ruiz', initials: 'CM', area: 'Operaciones', lider: 'Juan Pérez', pais: 'Perú', ciudad: 'Lima' },
     { id: 8, name: 'Ana Fernández Castro', initials: 'AF', area: 'Ventas', lider: 'María González', pais: 'México', ciudad: 'Guadalajara' },
     { id: 9, name: 'Luis Ramírez Pérez', initials: 'LR', area: 'Marketing', lider: 'Carlos Rodríguez', pais: 'Argentina', ciudad: 'Córdoba' },
-    { id: 10, name: 'Sofia Hernández Vega', initials: 'SH', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Chile', ciudad: 'Valparaíso' },
+    { id: 10, name: 'Isabella Castillo Moreno', initials: 'IC', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Chile', ciudad: 'Valparaíso' },
   ];
 
   // Función para contar colaboradores según el alcance y valores seleccionados
@@ -141,6 +142,20 @@ export default function App() {
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : [];
+
+  // Función para obtener items dinámicos según el alcance
+  const getAlcanceItems = () => {
+    if (alcance === 'Área') {
+      return [...new Set(colaboradores.map(c => c.area))].sort();
+    } else if (alcance === 'Líder') {
+      return [...new Set(colaboradores.map(c => c.lider))].sort();
+    } else if (alcance === 'País') {
+      return [...new Set(colaboradores.map(c => c.pais))].sort();
+    } else if (alcance === 'Ciudad') {
+      return [...new Set(colaboradores.map(c => c.ciudad))].sort();
+    }
+    return [];
+  };
 
   const totalPeso = parseInt(peso360 || '0') + parseInt(pesoObjetivos || '0');
 
@@ -206,13 +221,50 @@ export default function App() {
     }, 300);
   };
 
+  const startIndividualDownload = () => {
+    setIsDownloading(true);
+    setIsDownloadMinimized(false);
+    setShowDownloadPanel(true);
+
+    const reportId = Date.now();
+    const reportName = `Reportes_Individuales_${reportId}.zip`;
+
+    // Agregar nuevo reporte ZIP a la lista de descarga
+    setDownloadingReports((prev) => [
+      ...prev,
+      { id: reportId, name: reportName, reportType: drawerTitle, progress: 0, status: 'downloading', collaboratorCount: selectedColaboradores.length }
+    ]);
+
+    // Simular progreso de descarga
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 25;
+      if (progress >= 100) {
+        progress = 100;
+        setDownloadingReports((prev) =>
+          prev.map((report) =>
+            report.id === reportId ? { ...report, progress: 100, status: 'completed' as const } : report
+          )
+        );
+        setDownloadComplete(true);
+        clearInterval(interval);
+      } else {
+        setDownloadingReports((prev) =>
+          prev.map((report) =>
+            report.id === reportId ? { ...report, progress: Math.floor(progress) } : report
+          )
+        );
+      }
+    }, 300);
+  };
+
   const handleGenerateReport = async () => {
     // Limpiar errores previos
     setShowColaboradorError(false);
     setShowAlcanceFieldError(false);
 
     // Validar solo cuando el usuario hace clic en generar
-    if (reportType === 'Individual' && !selectedColaborador) {
+    if (reportType === 'Individual' && selectedColaboradores.length === 0) {
       setShowColaboradorError(true);
       return;
     }
@@ -257,26 +309,32 @@ export default function App() {
       setShowDownloadPanel(true);
       startMassiveDownload();
     } else {
-      // Para individual, abrir previsualizador en nueva pestaña y mostrar estado en drawer
-      window.open('?pdf-preview=true', '_blank');
-
-      // Mostrar estado de reporte en cola en el drawer
+      // Para individual: si es solo 1, abrir PDF en nueva pestaña; si son múltiples, descargar como ZIP
       setShowReportOptions(true);
       setActiveDrawerTab('descargas');
-      setIsDownloading(true);
-      setShowDownloadPanel(true);
-      setDownloadComplete(true);
-      setDownloadingReports([
-        {
-          id: Date.now(),
-          name: selectedColaborador,
+
+      if (selectedColaboradores.length === 1) {
+        // Un solo colaborador: abrir en nueva pestaña
+        window.open('?pdf-preview=true', '_blank');
+        setIsDownloading(true);
+        setShowDownloadPanel(true);
+        setDownloadComplete(true);
+
+        const newReports = selectedColaboradores.map((colaborador) => ({
+          id: Date.now() + Math.random(),
+          name: colaborador,
           reportType: drawerTitle,
           progress: 100,
-          status: 'completed',
+          status: 'completed' as const,
           collaboratorCount: 1,
           isIndividual: true
-        }
-      ]);
+        }));
+
+        setDownloadingReports(newReports);
+      } else {
+        // Múltiples colaboradores: descargar como ZIP
+        startIndividualDownload();
+      }
     }
   };
 
@@ -383,16 +441,15 @@ export default function App() {
     setIsDrawerOpen(true);
     setIsDownloading(true);
     setDownloadComplete(true);
-    setDownloadingReports([
-      {
-        id: Date.now(),
-        name: selectedColaborador,
-        progress: 100,
-        status: 'completed',
-        collaboratorCount: 1,
-        isIndividual: true
-      }
-    ]);
+    const newReports = selectedColaboradores.map((colaborador) => ({
+      id: Date.now() + Math.random(),
+      name: colaborador,
+      progress: 100,
+      status: 'completed' as const,
+      collaboratorCount: 1,
+      isIndividual: true
+    }));
+    setDownloadingReports(newReports);
   };
 
   // Si estamos en modo preview del PDF
@@ -1221,10 +1278,12 @@ export default function App() {
                                               {report.name}
                                             </p>
                                             <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">
-                                              {[1, 2, 4].includes(selectedAnalysisId as number) 
-                                                ? (isCompleted 
+                                              {[1, 2, 4].includes(selectedAnalysisId as number)
+                                                ? (isCompleted
                                                     ? `${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'} descargados`
                                                     : `Descargando ${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`)
+                                                : selectedAnalysisId === 3
+                                                ? `${report.reportType || 'Reporte'} • ${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`
                                                 : (report.reportType || 'Reporte')}
                                             </p>
                                           </div>
@@ -1452,76 +1511,20 @@ export default function App() {
 
               {reportType === 'Individual' ? (
                 <>
-                  {/* Seleccionar Colaborador */}
-                  <div className="mb-6">
-                    <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
-                      Seleccionar colaborador
-                    </label>
-                    <div className="relative" ref={searchRef}>
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C646F] z-10" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                      </svg>
-                      <input
-                        type="text"
-                        placeholder="Buscar colaborador..."
-                        value={selectedColaborador || searchTerm}
-                        onChange={(e) => {
-                          setSearchTerm(e.target.value);
-                          setSelectedColaborador('');
-                          setShowSuggestions(true);
-                          setShowColaboradorError(false);
-                        }}
-                        onFocus={() => setShowSuggestions(true)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] placeholder-[#5C646F] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                          showColaboradorError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                        }`}
-                      />
-
-                      {/* Dropdown de sugerencias */}
-                      {showSuggestions && searchTerm && filteredColaboradores.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
-                          {filteredColaboradores.map((colaborador) => (
-                            <button
-                              key={colaborador.id}
-                              onClick={() => {
-                                setSelectedColaborador(colaborador.name);
-                                setSearchTerm('');
-                                setShowSuggestions(false);
-                              }}
-                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#F3F3F4] transition-colors text-left"
-                            >
-                              <div className="bg-[#0C5BEF] rounded-full size-8 flex items-center justify-center shrink-0">
-                                <p className="font-['Open_Sans:Bold',sans-serif] font-bold text-white text-xs">
-                                  {colaborador.initials}
-                                </p>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                                  {colaborador.name}
-                                </p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Mensaje cuando no hay resultados */}
-                      {showSuggestions && searchTerm && filteredColaboradores.length === 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-lg px-4 py-3 z-50">
-                          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F] text-center">
-                            No se encontraron colaboradores
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Error de colaborador */}
-                    {showColaboradorError && (
-                      <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                        Por favor selecciona un colaborador antes de generar el reporte.
-                      </p>
-                    )}
-                  </div>
+                  {/* Seleccionar Colaboradores (Múltiples) */}
+                  <MultiSelectDropdown
+                    label="Seleccionar colaboradores"
+                    items={colaboradores.map((colab) => ({
+                      id: colab.id,
+                      name: colab.name,
+                      initials: colab.initials
+                    }))}
+                    selected={selectedColaboradores}
+                    onSelect={setSelectedColaboradores}
+                    placeholder="Buscar colaborador..."
+                    error={showColaboradorError}
+                    maxDisplayCount={5}
+                  />
                 </>
               ) : (
                 <>
@@ -1581,97 +1584,22 @@ export default function App() {
 
                   {/* Campo específico según selección */}
                   {(['Área', 'Líder', 'País', 'Ciudad'] as const).includes(alcance as any) && (
-                    <div className="mb-6">
-                      <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2">
-                        {alcance}
-                      </label>
-                      <div className="relative">
-                        {openDropdown === 'alcanceField' && (
-                          <div className="fixed inset-0 z-40" onClick={() => setOpenDropdown(null)} />
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (openDropdown === 'alcanceField') {
-                              setOpenDropdown(null);
-                            } else {
-                              const loadFailed = isErrorDemoMode && Math.random() < 0.25;
-                              setFetchDataError(loadFailed);
-                              setOpenDropdown('alcanceField');
-                            }
-                          }}
-                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm bg-white flex items-center justify-between hover:border-[#0C5BEF] transition-colors ${
-                            showAlcanceFieldError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                          }`}
-                        >
-                          <span className={alcanceFieldValue.length > 0 ? 'text-[#303A47]' : 'text-[#5C646F]'}>
-                            {alcanceFieldValue.length === 0
-                              ? `Seleccionar ${alcance.toLowerCase()}...`
-                              : alcanceFieldValue.length === 1
-                              ? alcanceFieldValue[0]
-                              : `${alcanceFieldValue.length} ${alcance.toLowerCase()}s seleccionados`}
-                          </span>
-                          <svg className={`w-4 h-4 text-[#303A47] transition-transform duration-200 ${openDropdown === 'alcanceField' ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M7 10l5 5 5-5z"/>
-                          </svg>
-                        </button>
-                        {openDropdown === 'alcanceField' && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-xl z-50 overflow-hidden">
-                            {fetchDataError ? (
-                              <div className="px-4 py-4 flex flex-col items-center gap-2 text-center">
-                                <svg className="w-8 h-8 text-[#D92D20]" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                                </svg>
-                                <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47]">No pudimos cargar las opciones</p>
-                                <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">Verifica tu conexión e intenta de nuevo.</p>
-                                <button
-                                  type="button"
-                                  onClick={() => { setFetchDataError(false); }}
-                                  className="mt-1 px-3 py-1.5 bg-[#0C5BEF] text-white rounded-lg font-['Noto_Sans:Regular',sans-serif] text-xs hover:bg-[#0A4BC7] transition-colors"
-                                >
-                                  Reintentar
-                                </button>
-                              </div>
-                            ) : (
-                             (alcance === 'Área' ? [...new Set(colaboradores.map(c => c.area))].sort()
-                                : alcance === 'Líder' ? [...new Set(colaboradores.map(c => c.lider))].sort()
-                                : alcance === 'País' ? [...new Set(colaboradores.map(c => c.pais))].sort()
-                                : [...new Set(colaboradores.map(c => c.ciudad))].sort()
-                              ).map(opt => (
-                                <button
-                                  key={opt}
-                                  type="button"
-                                  onClick={() => {
-                                    setAlcanceFieldValue(prev =>
-                                      prev.includes(opt) ? prev.filter(v => v !== opt) : [...prev, opt]
-                                    );
-                                    setShowAlcanceFieldError(false);
-                                  }}
-                                  className={`w-full px-4 py-2.5 text-left font-['Noto_Sans:Regular',sans-serif] text-sm transition-colors flex items-center gap-3 ${
-                                    alcanceFieldValue.includes(opt) ? 'text-[#0C5BEF] bg-[#EEF4FF]' : 'text-[#303A47] hover:bg-[#F3F3F4]'
-                                  }`}
-                                >
-                                  <div className={`w-4 h-4 border-2 rounded flex items-center justify-center shrink-0 ${
-                                    alcanceFieldValue.includes(opt) ? 'bg-[#0C5BEF] border-[#0C5BEF]' : 'border-[#D0D2D5]'
-                                  }`}>
-                                    {alcanceFieldValue.includes(opt) && (
-                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                                      </svg>
-                                    )}
-                                  </div>
-                                  <span>{opt}</span>
-                                </button>
-                              ))
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      {showAlcanceFieldError && (
-                        <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                          Debes seleccionar {alcance === 'Área' ? 'un área' : alcance === 'Líder' ? 'un líder' : alcance === 'País' ? 'un país' : 'una ciudad'} para generar los reportes masivos.
-                        </p>
-                      )}
+                    <>
+                      <MultiSelectDropdown
+                        label={alcance}
+                        items={getAlcanceItems().map((item) => ({
+                          id: item,
+                          name: item
+                        }))}
+                        selected={alcanceFieldValue as string[]}
+                        onSelect={(values) => {
+                          setAlcanceFieldValue(values);
+                          setShowAlcanceFieldError(false);
+                        }}
+                        placeholder={`Seleccionar ${alcance.toLowerCase()}...`}
+                        error={showAlcanceFieldError}
+                        maxDisplayCount={5}
+                      />
                       {alcanceFieldValue.length > 0 && (
                         <div className="mt-3 bg-[#E7F0FF] border border-[#A2C4FF] rounded-lg p-3 flex gap-2">
                           <svg className="w-5 h-5 text-[#0C5BEF] shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -1686,7 +1614,7 @@ export default function App() {
                           </p>
                         </div>
                       )}
-                    </div>
+                    </>
                   )}
 
                   {alcance === 'Columna A' && (
@@ -1799,8 +1727,8 @@ export default function App() {
         </div>
       )}
 
-            {/* Footer Actions - Solo mostrar si está en tab de generar reporte */}
-            {activeDrawerTab === 'generar' && (
+            {/* Footer Actions - Solo mostrar si está en tab de generar reporte y NO en modal de selección */}
+            {activeDrawerTab === 'generar' && !showReportTypeSelection && (
               <div className="border-t border-[#D0D2D5] px-6 py-4 space-y-3">
                 <button
                   onClick={handleGenerateReport}
@@ -1912,9 +1840,14 @@ export default function App() {
                               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                             </svg>
                           </div>
-                          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                            {report.name}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                              {report.name}
+                            </p>
+                            <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                              {report.reportType === 'Individual' ? 'Reporte Individual' : 'Reporte Masivo'} • {report.collaboratorCount || 1} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
+                            </p>
+                          </div>
                         </div>
                         <button
                           onClick={() => handleRetryReport(report.id)}
@@ -1939,9 +1872,14 @@ export default function App() {
                                 <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                               </svg>
                             )}
-                            <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                              {report.name}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                {report.name}
+                              </p>
+                              <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                                {report.reportType === 'Individual' ? 'Reporte Individual' : 'Reporte Masivo'} • {report.collaboratorCount || 1} {report.collaboratorCount === 1 ? 'reporte' : 'reportes'}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                             <p className="font-['Noto_Sans:Bold',sans-serif] text-sm text-[#0C5BEF]">
