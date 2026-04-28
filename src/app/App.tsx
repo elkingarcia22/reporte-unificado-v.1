@@ -510,14 +510,14 @@ export default function App() {
                 setShowPdfViewer(false);
                 setShowAnalysisList(true);
               }}
-              className="flex items-center px-4 py-1 rounded-[5px] shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
+              className="flex items-center px-4 h-[44px] rounded-[8px] shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
             >
               <div className="flex gap-2.5 items-center text-[#0C5BEF]">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                 </svg>
                 <div className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm whitespace-nowrap">
-                  <p className="leading-[22px]">Regresar</p>
+                  <p className="leading-6">Regresar</p>
                 </div>
               </div>
             </button>
@@ -695,20 +695,20 @@ export default function App() {
 
             {/* Botón Editar */}
             <button
-              className="bg-white flex items-center px-3 py-2 rounded-[5px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
+              className="bg-white flex items-center justify-center w-11 h-11 rounded-[8px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#F3F3F4] transition-colors cursor-pointer"
               title="Editar"
             >
-              <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
               </svg>
             </button>
 
             {/* Botón Eliminar */}
             <button
-              className="bg-white flex items-center px-3 py-2 rounded-[5px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#FEF3F2] hover:border-[#D92D20] transition-colors cursor-pointer group"
+              className="bg-white flex items-center justify-center w-11 h-11 rounded-[8px] border border-[#D0D2D5] border-solid shrink-0 hover:bg-[#FEF3F2] hover:border-[#D92D20] transition-colors cursor-pointer group"
               title="Eliminar"
             >
-              <svg className="w-4 h-4 text-[#5C646F] group-hover:text-[#D92D20] transition-colors" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#5C646F] group-hover:text-[#D92D20] transition-colors" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
               </svg>
             </button>
@@ -805,7 +805,7 @@ export default function App() {
               </div>
 
               {/* Botón Personalizar cuadrantes */}
-              <div className="bg-white flex items-center px-4 py-2 rounded-[5px] border border-[#0C5BEF] border-solid">
+              <div className="bg-white flex items-center px-4 py-2.5 rounded-[8px] border border-[#0C5BEF] border-solid">
                 <div className="flex gap-2.5 items-center text-[#0C5BEF] text-base whitespace-nowrap">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
