@@ -21,6 +21,10 @@
 
 ## Descripción General
 
+> [!IMPORTANT]
+> **Fuente de Datos:** Toda la información mostrada en los filtros (País, Área, Líder, Ciudad) es dinámica y se extrae en tiempo real de la base de colaboradores vinculada al análisis seleccionado. No se deben usar datos "quemados" (hardcoded).
+> **Formato Masivo:** Las descargas masivas se agrupan siempre en un archivo **.ZIP** que contiene los PDFs individuales de cada colaborador.
+
 ### Pantallas Principales
 
 #### 1. **Pantalla de Análisis (Home)**
@@ -38,7 +42,7 @@
   2. **Editar** (Icono de edición)
   3. **Eliminar** (Icono de eliminación)
 
-#### 3. **Pantalla de Generación de Reportes (Drawer: "Crear Reporte Unificado")**
+#### 3. **Pantalla de Generación de Reportes (Drawer: "Reporte Unificado")**
 - **Tab: Generar reporte**: Formulario de entrada para reportes (Individual o Masivo)
 - **Tab: Descargas**: 
   - Gestión de reportes en progreso (con barra de progreso azul)

@@ -107,22 +107,26 @@ export default function App() {
     { id: 10, name: 'Sofia Hernández Vega', initials: 'SH', area: 'Tecnología', lider: 'Juan Pérez', pais: 'Chile', ciudad: 'Valparaíso' },
   ];
 
-  // Función para contar colaboradores según el alcance y valor seleccionado
-  const getColaboradoresCount = (alcanceType: string, fieldValue: string): number => {
+  // Función para contar colaboradores según el alcance y valores seleccionados
+  const getColaboradoresCount = (alcanceType: string, fieldValues: string[] | string): number => {
     if (alcanceType === 'Todos los colaboradores en el análisis') {
       return colaboradores.length;
     }
+    
+    const values = Array.isArray(fieldValues) ? fieldValues : [fieldValues];
+    if (values.length === 0) return 0;
+
     if (alcanceType === 'Área') {
-      return colaboradores.filter(c => c.area === fieldValue).length;
+      return colaboradores.filter(c => values.includes(c.area)).length;
     }
     if (alcanceType === 'Líder') {
-      return colaboradores.filter(c => c.lider === fieldValue).length;
+      return colaboradores.filter(c => values.includes(c.lider)).length;
     }
     if (alcanceType === 'País') {
-      return colaboradores.filter(c => c.pais === fieldValue).length;
+      return colaboradores.filter(c => values.includes(c.pais)).length;
     }
     if (alcanceType === 'Ciudad') {
-      return colaboradores.filter(c => c.ciudad === fieldValue).length;
+      return colaboradores.filter(c => values.includes(c.ciudad)).length;
     }
     return 0;
   };
@@ -283,7 +287,7 @@ export default function App() {
     const reportName = `Reporte_Masivo_${reportId}.zip`;
 
     // Agregar nuevo reporte a la lista de descarga
-    const collaboratorCount = getColaboradoresCount(alcance, Array.isArray(alcanceFieldValue) ? alcanceFieldValue[0] : alcanceFieldValue);
+    const collaboratorCount = getColaboradoresCount(alcance, alcanceFieldValue);
     setDownloadingReports((prev) => [
       ...prev,
       { id: reportId, name: reportName, progress: 0, status: 'downloading', collaboratorCount }
@@ -1552,7 +1556,7 @@ export default function App() {
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                         </svg>
                         <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                          Se generarán reportes para los {getColaboradoresCount('Todos los colaboradores en el análisis', '')} colaboradores analizados en el análisis actual.
+                          Se generará un archivo <strong>ZIP</strong> con los reportes individuales de los {getColaboradoresCount('Todos los colaboradores en el análisis', [])} colaboradores analizados.
                         </p>
                       </div>
                     )}
@@ -1612,10 +1616,10 @@ export default function App() {
                                 </button>
                               </div>
                             ) : (
-                              (alcance === 'Área' ? ['Tecnología', 'Ventas', 'Marketing', 'Recursos Humanos', 'Operaciones']
-                                : alcance === 'Líder' ? ['Juan Pérez', 'María González', 'Carlos Rodríguez', 'Ana Martínez']
-                                : alcance === 'País' ? ['México', 'Colombia', 'Argentina', 'Chile', 'Perú']
-                                : ['Bogotá', 'Medellín', 'Ciudad de México', 'Guadalajara', 'Buenos Aires', 'Córdoba', 'Santiago', 'Valparaíso', 'Lima']
+                             (alcance === 'Área' ? [...new Set(colaboradores.map(c => c.area))].sort()
+                                : alcance === 'Líder' ? [...new Set(colaboradores.map(c => c.lider))].sort()
+                                : alcance === 'País' ? [...new Set(colaboradores.map(c => c.pais))].sort()
+                                : [...new Set(colaboradores.map(c => c.ciudad))].sort()
                               ).map(opt => (
                                 <button
                                   key={opt}
@@ -1657,7 +1661,7 @@ export default function App() {
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                           </svg>
                           <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#303A47]">
-                            Se generarán reportes para los {getColaboradoresCount(alcance, Array.isArray(alcanceFieldValue) ? alcanceFieldValue[0] : alcanceFieldValue)} colaboradores
+                            Se generará un archivo <strong>ZIP</strong> con los reportes de los {getColaboradoresCount(alcance, alcanceFieldValue)} colaboradores
                             {alcanceFieldValue.length === 1
                               ? (alcance === 'Área' ? ' del área' : alcance === 'Líder' ? ' bajo este líder' : alcance === 'País' ? ' del país' : ' de la ciudad')
                               : (alcance === 'Área' ? ' de las áreas' : alcance === 'Líder' ? ' bajo estos líderes' : alcance === 'País' ? ' de los países' : ' de las ciudades')
