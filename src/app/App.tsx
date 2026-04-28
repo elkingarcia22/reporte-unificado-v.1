@@ -1394,7 +1394,7 @@ export default function App() {
                       </div>
                       <div className="flex-1">
                         <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-base text-[#303A47]">Resultados del análisis</p>
-                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F]">Informe detallado de los resultados individuales y por dimensiones</p>
+                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F]">Informe detallado de los resultados individuales y masivos</p>
                       </div>
                       <svg className="w-5 h-5 text-[#D0D2D5] group-hover:text-[#0C5BEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
