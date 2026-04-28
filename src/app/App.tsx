@@ -1086,7 +1086,7 @@ export default function App() {
             <div className="px-6 py-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl flex-1">
-                  Descargar reportes
+                  {selectedAnalysisId === 4 ? 'Reporte unificado' : 'Descargar reportes'}
                 </h2>
                 <button
                   onClick={() => handleCloseDrawer()}
