@@ -525,7 +525,7 @@ export default function App() {
             {/* Título */}
             <div className="flex gap-1 items-center min-h-8 flex-1 min-w-0">
               <p className="font-['Helvetica_Now_Text_:Extra_Bold',sans-serif] text-[#303A47] text-lg whitespace-nowrap">
-                {selectedAnalysisId === 4 ? 'Análisis de talento semestre 2 2023' : selectedAnalysisId === 2 ? 'Análisis de talento semestre 2 2024' : selectedAnalysisId === 3 ? 'Análisis de talento semestre 1 2024' : 'Análisis Q2 2025'}
+                {selectedAnalysisId === 1 ? 'Análisis de talento semestre 1 2025' : selectedAnalysisId === 4 ? 'Análisis de talento semestre 2 2023' : selectedAnalysisId === 2 ? 'Análisis de talento semestre 2 2024' : selectedAnalysisId === 3 ? 'Análisis de talento semestre 1 2024' : 'Análisis Q2 2025'}
               </p>
               <div className="flex items-center justify-center px-3 py-2 rounded-full size-8 shrink-0">
                 <svg className="w-4 h-4 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
@@ -539,7 +539,7 @@ export default function App() {
             {/* Botón de acceso directo al Historial/Descargas */}
 
             {/* Botón Descargar con label y dropdown */}
-              {selectedAnalysisId === 4 ? (
+              {[1, 4].includes(selectedAnalysisId as number) ? (
                 /* Botón Primario + Secundario con Dropdown para Análisis 4 */
                 <div className="flex gap-2 items-center">
                   <button
@@ -1086,7 +1086,7 @@ export default function App() {
             <div className="px-6 py-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl flex-1">
-                  {selectedAnalysisId === 4 ? 'Reporte unificado' : 'Descargar reportes'}
+                  {[1, 4].includes(selectedAnalysisId as number) ? 'Reporte unificado' : 'Descargar reportes'}
                 </h2>
                 <button
                   onClick={() => handleCloseDrawer()}
@@ -1221,7 +1221,7 @@ export default function App() {
                                               {report.name}
                                             </p>
                                             <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">
-                                              {selectedAnalysisId === 4 
+                                              {[1, 4].includes(selectedAnalysisId as number) 
                                                 ? (isCompleted 
                                                     ? `${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'} descargados`
                                                     : `Descargando ${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`)
@@ -1279,14 +1279,14 @@ export default function App() {
                     {!(selectedAnalysisId === 2 && downloadingReports.length === 0 && getRecentDownloadHistory().length === 0) && (
                       <div className="space-y-3">
 
-                          {selectedAnalysisId !== 4 && (
+                          {![1, 4].includes(selectedAnalysisId as number) && (
                             <button
                               onClick={() => {
                                 setActiveDrawerTab('generar');
                                 if (selectedAnalysisId === 3) {
                                   setShowReportTypeSelection(true);
                                   setDrawerTitle('Seleccionar tipo de reporte');
-                                } else if (selectedAnalysisId === 4) {
+                                } else if ([1, 4].includes(selectedAnalysisId as number)) {
                                   setShowReportTypeSelection(false);
                                   setDrawerTitle('Reporte unificado');
                                 }
