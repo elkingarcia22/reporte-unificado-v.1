@@ -49,6 +49,20 @@
   - Historial de descargas recientes
   - Banner de error para casos específicos (Análisis ID 2)
 
+#### 4. **Panel Flotante de Descargas (Mini Modal)**
+- **Ubicación:** Esquina inferior derecha (visible cuando el drawer está cerrado y hay descargas activas).
+- **Comportamiento:**
+  - Muestra una lista compacta de reportes en progreso o completados.
+  - **Sin botones inferiores:** Se eliminaron los botones de "Cerrar" o "Ver descarga" del pie del panel para una interfaz más limpia.
+- **Acciones en Cabecera:**
+  - **Ver en Drawer** (Icono de flecha externa): Abre el drawer principal directamente en la pestaña de "Descargas".
+  - **Minimizar** (Icono chevron): Reduce el panel a una barra de estado mínima.
+  - **Cerrar / Detener** (Icono X): Cierra el panel flotante o detiene las descargas en curso.
+- **Estados de Fila:**
+  - **Cargando:** Muestra spinner azul y porcentaje.
+  - **Completado:** Check verde y 100%.
+  - **Error:** Icono rojo y botón de "Reintentar" (solo para Análisis ID 2).
+
 ---
 
 ## Flujos Happy Path
@@ -1093,11 +1107,12 @@ Cierre: Click fuera o botón cerrar
   - [ ] Error: X rojo + botón reintentar
   - [ ] Minimizado: Icono + título
   - [ ] Expandido: Lista completa
+  - [ ] **Limpieza:** Sin botones redundantes (Cerrar/Ver) en el pie del panel.
 
 - [ ] **Drawer (Lado Izquierdo)**
   - [ ] Abre al generar o al pulsar "Ver descarga".
   - [ ] Muestra título correcto (Descargando vs Completadas).
-  - [ ] Botón "Ver descarga": Funcional desde el panel flotante.
+  - [ ] Botón "Ver en Drawer": Icono en cabecera para abrir el drawer principal.
   - [ ] Mensaje "La descarga está en progreso...": Visible, azul y persistente durante descargas.
   - [ ] **Caso Error Análisis 2:** Muestra banner "Hubo un problema al recuperar los elementos descargados anteriormente en este análisis. Por favor, inténtalo más tarde."
   - [ ] **Caso Error Análisis 2:** Botones de footer (Minimizar/Limpiar) se ocultan automáticamente para mantener la limpieza.
