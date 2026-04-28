@@ -21,8 +21,6 @@ export function MultiSelectDropdown({
 }: MultiSelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
-  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,80 +57,6 @@ export function MultiSelectDropdown({
     if (isOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
-    if (isOpen && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const dropdownHeight = 300;
-
-      const containerStyle = window.getComputedStyle(containerRef.current);
-      const parentElement = containerRef.current.parentElement;
-      const parentRect = parentElement?.getBoundingClientRect();
-      const parentStyle = parentElement ? window.getComputedStyle(parentElement) : null;
-
-      console.log('=== DROPDOWN DEBUG ===');
-      console.log('Container rect:', {
-        top: rect.top,
-        bottom: rect.bottom,
-        left: rect.left,
-        right: rect.right,
-        height: rect.height,
-        width: rect.width
-      });
-      console.log('Space available:', {
-        spaceBelow,
-        spaceAbove,
-        windowHeight: window.innerHeight,
-        dropdownHeight,
-        enoughSpaceBelow: spaceBelow >= dropdownHeight,
-        enoughSpaceAbove: spaceAbove >= dropdownHeight
-      });
-      console.log('Container styles:', {
-        position: containerStyle.position,
-        overflow: containerStyle.overflow,
-        zIndex: containerStyle.zIndex,
-        display: containerStyle.display
-      });
-      console.log('Parent element:', {
-        tag: parentElement?.tagName,
-        position: parentStyle?.position,
-        overflow: parentStyle?.overflow,
-        zIndex: parentStyle?.zIndex
-      });
-      console.log('Parent rect:', {
-        top: parentRect?.top,
-        bottom: parentRect?.bottom,
-        overflow: parentStyle?.overflow
-      });
-      console.log('Position will be:', spaceBelow < dropdownHeight && spaceAbove > dropdownHeight ? 'TOP' : 'BOTTOM');
-      console.log('=== END DEBUG ===');
-
-      // Calcular posición fixed
-      const isTop = spaceBelow < dropdownHeight && spaceAbove > dropdownHeight;
-      setDropdownPosition(isTop ? 'top' : 'bottom');
-
-      if (isTop) {
-        // Dropdown va arriba del input
-        setDropdownStyle({
-          position: 'fixed',
-          left: `${rect.left}px`,
-          right: `${window.innerWidth - rect.right}px`,
-          bottom: `${window.innerHeight - rect.top}px`,
-          width: `${rect.width}px`,
-          zIndex: 9999
-        });
-      } else {
-        // Dropdown va abajo del input
-        setDropdownStyle({
-          position: 'fixed',
-          left: `${rect.left}px`,
-          right: `${window.innerWidth - rect.right}px`,
-          top: `${rect.bottom + 4}px`,
-          width: `${rect.width}px`,
-          zIndex: 9999
-        });
-      }
-    }
   }, [isOpen]);
 
   useEffect(() => {
@@ -147,7 +71,7 @@ export function MultiSelectDropdown({
   }, []);
 
   return (
-    <div className="mb-6" ref={containerRef}>
+    <div className="mb-6 relative" ref={containerRef}>
       <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
         {label}
       </label>
@@ -209,10 +133,7 @@ export function MultiSelectDropdown({
 
         {/* Dropdown */}
         {isOpen && (
-          <div
-            className="bg-white border border-[#D0D2D5] rounded-lg shadow-xl overflow-hidden"
-            style={dropdownStyle}
-          >
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-xl z-[9999] overflow-hidden">
             {/* Búsqueda */}
             <div className="p-3 border-b border-[#D0D2D5]">
               <div className="relative">
