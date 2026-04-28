@@ -1274,35 +1274,7 @@ export default function App() {
                     {/* Opciones de acción unificadas */}
                     {!(selectedAnalysisId === 2 && downloadingReports.length === 0 && getRecentDownloadHistory().length === 0) && (
                       <div className="space-y-3">
-                          {selectedAnalysisId === 4 && (
-                            <div className="relative">
-                              <button
-                                onClick={() => setOpenDropdown(openDropdown === 'export_id4' ? null : 'export_id4')}
-                                className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors flex items-center justify-center gap-2"
-                              >
-                                <span>Otras descargas</span>
-                                <svg className={`w-4 h-4 transition-transform ${openDropdown === 'export_id4' ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M7 10l5 5 5-5z"/>
-                                </svg>
-                              </button>
-                              {openDropdown === 'export_id4' && (
-                                <div className="absolute bottom-full left-0 w-full mb-2 bg-white border border-[#D0D2D5] rounded-lg shadow-xl py-1 z-[110] animate-[fadeIn_0.2s_ease-in-out]">
-                                  <button className="w-full text-left px-4 py-3 hover:bg-[#F3F3F4] text-[#303A47] text-sm font-['Helvetica_Now_Text_:Regular',sans-serif] flex items-center gap-3 transition-colors">
-                                    <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Descargar JPG
-                                  </button>
-                                  <button className="w-full text-left px-4 py-3 hover:bg-[#F3F3F4] text-[#303A47] text-sm font-['Helvetica_Now_Text_:Regular',sans-serif] flex items-center gap-3 transition-colors border-t border-[#F3F3F4]">
-                                    <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Descargar CSV
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          )}
+
                           <button
                             onClick={() => {
                               setActiveDrawerTab('generar');
