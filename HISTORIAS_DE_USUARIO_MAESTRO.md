@@ -824,29 +824,31 @@ Estados Posibles:
 
 1. EN PROGRESO
    ┌──────────────────────┐
-   │ [↓] Generando...     │
+   │ [●] Generando...     │
    │ X en cola            │
-   │ [Ver descarga] [↑]   │
+   │ [↗] [↑] [X]          │
    └──────────────────────┘
 
 2. COMPLETADO (sin errores)
    ┌──────────────────────┐
    │ [✓] Descarga completada │
    │                      │
-   │ [Ver descarga] [↑]   │
+   │ [↗] [↑] [X]          │
    └──────────────────────┘
 
 3. CON ERRORES
    ┌──────────────────────┐
    │ [✗] La descarga falló │
    │                      │
-   │ [Ver descarga] [↑]   │
+   │ [↗] [↑] [X]          │
    └──────────────────────┘
 
-**Botones del Panel Flotante:**
-- `[Ver descarga]`: Abre el drawer lateral en la pestaña de descargas.
-- `[↑]` Expandir: Abre el panel lateral completo (drawer).
-- **Nota:** Se eliminaron los botones de cierre [X] y minimizar del panel pequeño para simplificar la navegación hacia el drawer.
+**Acciones del Panel Flotante (Iconos en Cabecera):**
+- `[↗]` **Ver en Drawer**: Icono de flecha externa que abre el drawer principal en la pestaña de descargas.
+- `[↑/↓]` **Expandir/Contraer**: Icono de chevron para ver la lista completa de reportes o minimizarla.
+- `[X]` **Cerrar**: Detiene las descargas o cierra el panel de resumen.
+
+**Nota:** Se eliminaron los botones de texto (como "Ver descarga" o "Cerrar") del pie del panel para mantener una estética minimalista. Toda la interacción se realiza vía iconos en la parte superior derecha.
 
 ---
 
@@ -854,7 +856,7 @@ Estados Posibles:
 
 ```
 NORMAL FLOW (Q2 2025):
-downloading → completed → mensaje éxito → botón "Ver descarga" → abre drawer
+downloading → completed → mensaje éxito → icono "Ver en Drawer" → abre drawer en tab descargas
 
 ERROR FLOW (Talento Semestre 2 2024):
 downloading → error → toast error → drawer muestra estado de error persistente
