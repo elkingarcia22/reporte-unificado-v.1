@@ -1221,7 +1221,11 @@ export default function App() {
                                               {report.name}
                                             </p>
                                             <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">
-                                              {report.reportType || 'Reporte'}
+                                              {selectedAnalysisId === 4 
+                                                ? (isCompleted 
+                                                    ? `${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'} descargados`
+                                                    : `Descargando ${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`)
+                                                : (report.reportType || 'Reporte')}
                                             </p>
                                           </div>
                                         </div>
