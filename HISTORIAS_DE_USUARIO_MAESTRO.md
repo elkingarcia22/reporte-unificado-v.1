@@ -23,8 +23,8 @@
 La plataforma ha evolucionado hacia una experiencia de **"Reporte Unificado"**, simplificando el flujo de generación masiva y estandarizando la interfaz de control.
 
 > [!IMPORTANT]
-> **Experiencia Unificada:** Se elimina el selector de tipo de reporte inicial. El flujo principal se centra en generar un reporte masivo (ZIP) por defecto para el alcance seleccionado.
-> **Descarga Directa:** Los botones secundarios permiten exportar la vista actual en formatos complementarios (JPG/CSV) sin pasar por el drawer.
+> **Experiencia Unificada:** Se ha simplificado el acceso desde la cabecera. El usuario decide dentro del drawer si desea un reporte **Individual (PDF)** o **Masivo (ZIP)**.
+> **Descarga Directa:** Los botones secundarios permiten exportar la vista actual en formatos complementarios (JPG/CSV) de manera inmediata.
 > **Persistencia:** Las descargas en curso continúan activas aunque se cierre el panel visual o el drawer.
 
 ---
@@ -39,9 +39,10 @@ La plataforma ha evolucionado hacia una experiencia de **"Reporte Unificado"**, 
 - **Acciones de Gestión:** Botones de "Editar" y "Eliminar" estandarizados como iconos cuadrados de alta visibilidad.
 
 ### 2. Configuración en Drawer
-- **Sin selector de tipo:** El usuario pasa directamente a configurar el alcance (Masivo por defecto).
-- **Alcance Dinámico:** Al seleccionar un área o líder, el sistema indica cuántos colaboradores se incluirán en el reporte ZIP unificado.
-- **Botón de Acción:** "Generar reporte unificado".
+- **Selector de Tipo de Reporte:** El usuario puede alternar entre:
+  - **Individual:** Permite buscar y seleccionar un colaborador específico para generar su reporte en formato **PDF**.
+  - **Masivo:** Permite configurar el alcance (Área, Líder, etc.) para generar un consolidado en formato **ZIP**.
+- **Botón de Acción:** "Generar reporte unificado" (inicia el proceso según la selección anterior).
 
 ---
 
