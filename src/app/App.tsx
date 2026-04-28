@@ -1279,21 +1279,23 @@ export default function App() {
                     {!(selectedAnalysisId === 2 && downloadingReports.length === 0 && getRecentDownloadHistory().length === 0) && (
                       <div className="space-y-3">
 
-                          <button
-                            onClick={() => {
-                              setActiveDrawerTab('generar');
-                              if (selectedAnalysisId === 3) {
-                                setShowReportTypeSelection(true);
-                                setDrawerTitle('Seleccionar tipo de reporte');
-                              } else if (selectedAnalysisId === 4) {
-                                setShowReportTypeSelection(false);
-                                setDrawerTitle('Reporte unificado');
-                              }
-                            }}
-                            className="w-full bg-[#F3F3F4] text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-transparent hover:bg-[#E7E8EA] transition-colors"
-                          >
-                            Descargar más reportes
-                          </button>
+                          {selectedAnalysisId !== 4 && (
+                            <button
+                              onClick={() => {
+                                setActiveDrawerTab('generar');
+                                if (selectedAnalysisId === 3) {
+                                  setShowReportTypeSelection(true);
+                                  setDrawerTitle('Seleccionar tipo de reporte');
+                                } else if (selectedAnalysisId === 4) {
+                                  setShowReportTypeSelection(false);
+                                  setDrawerTitle('Reporte unificado');
+                                }
+                              }}
+                              className="w-full bg-[#F3F3F4] text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-transparent hover:bg-[#E7E8EA] transition-colors"
+                            >
+                              Descargar más reportes
+                            </button>
+                          )}
                           <button
                             onClick={handleExitAndDownload}
                             className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
