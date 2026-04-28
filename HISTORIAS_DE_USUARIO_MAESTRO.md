@@ -801,27 +801,28 @@ Estados Posibles:
 1. EN PROGRESO
    ┌──────────────────────┐
    │ [↓] Generando...     │
-   │ X en cola    [↑][X]  │
+   │ X en cola            │
+   │ [Ver descarga] [↑]   │
    └──────────────────────┘
-   
+
 2. COMPLETADO (sin errores)
    ┌──────────────────────┐
    │ [✓] Descarga completada │
    │                      │
-   │ [↑][X]               │
+   │ [Ver descarga] [↑]   │
    └──────────────────────┘
 
 3. CON ERRORES
    ┌──────────────────────┐
    │ [✗] La descarga falló │
    │                      │
-   │ [↑][X]               │
+   │ [Ver descarga] [↑]   │
    └──────────────────────┘
-```
 
-**Botones:**
-- `[↑]` Expandir: Abre panel completo
-- `[X]` Cerrar: Cierra descarga completamente
+**Botones del Panel Flotante:**
+- `[Ver descarga]`: Abre el drawer lateral en la pestaña de descargas.
+- `[↑]` Expandir: Abre el panel lateral completo (drawer).
+- **Nota:** Se eliminaron los botones de cierre [X] y minimizar del panel pequeño para simplificar la navegación hacia el drawer.
 
 ---
 
@@ -829,15 +830,15 @@ Estados Posibles:
 
 ```
 NORMAL FLOW (Q2 2025):
-downloading → completed → mensaje éxito → abrir carpeta
+downloading → completed → mensaje éxito → botón "Ver descarga" → abre drawer
 
 ERROR FLOW (Talento Semestre 2 2024):
-downloading → error → toast error → opción reintentar o descartar
+downloading → error → toast error → drawer muestra estado de error persistente
 
-MINIMIZADO:
-expanded state → click minimizar → minimized state → expansible
-minimized + error → rojo X + título "La descarga falló"
-minimized + success → verde ✓ + título "Descarga completada"
+ESTADO DEL DRAWER:
+- Se eliminó el mensaje "Puedes minimizar esta ventana..." del footer para mayor limpieza.
+- El mensaje de estado "La descarga está en progreso..." se muestra de forma permanente y prominente (estilo azul) mientras existan descargas activas.
+- El botón "Abrir carpeta" fue renombrado a "Ver descarga" para consistencia con el panel flotante.
 ```
 
 ---
@@ -944,13 +945,13 @@ Tamaño: max-width: 448px (max-w-md)
 
 | # | Tipo | Acción | Resultado Esperado |
 |---|------|--------|-------------------|
-| 1 | Individual | Generar | ❌ Falla al 100% |
+| 1 | Individual | Generar | ❌ Falla al 100% (Simulación) |
 | 2 | Masivo | Área: Tecnología | ❌ 4 reportes fallan |
 | 3 | Masivo | País: Colombia | ❌ 4 reportes fallan |
-| 4 | Individual | Detener + Confirmar | ❌ Falla cancelación |
-| 5 | Masivo | Cancelar todo + Confirmar | ❌ Falla cancelación |
-| 6 | Cualquiera | Abrir carpeta (35% casos) | ❌ Puede fallar |
-| 7 | Cualquiera | Dropdown carga | ❌ Error datos |
+| 4 | Drawer | Carga inicial (ID 2) | ❌ Mensaje: "Hubo un problema al recuperar los elementos descargados anteriormente..." |
+| 5 | Drawer | Estado de Error | ❌ Botones "Minimizar" y "Limpiar historial" ocultos si no hay descargas exitosas/activas. |
+| 6 | Individual | Detener + Confirmar | ❌ Falla cancelación (Simulación) |
+| 7 | Masivo | Cancelar todo + Confirmar | ❌ Falla cancelación (Simulación) |
 
 ---
 
@@ -1083,11 +1084,13 @@ Cierre: Click fuera o botón cerrar
   - [ ] Expandido: Lista completa
 
 - [ ] **Drawer (Lado Izquierdo)**
-  - [ ] Abre al generar
-  - [ ] Muestra título correcto (Descargando vs Completadas)
-  - [ ] Botón "Abrir carpeta": Visible solo si éxito
-  - [ ] Botón "Abrir carpeta": Oculto si hay errores
-  - [ ] Mensaje éxito: Oculto si hay errores
+  - [ ] Abre al generar o al pulsar "Ver descarga".
+  - [ ] Muestra título correcto (Descargando vs Completadas).
+  - [ ] Botón "Ver descarga": Funcional desde el panel flotante.
+  - [ ] Mensaje "La descarga está en progreso...": Visible, azul y persistente durante descargas.
+  - [ ] **Caso Error Análisis 2:** Muestra banner "Hubo un problema al recuperar los elementos descargados anteriormente en este análisis. Por favor, inténtalo más tarde."
+  - [ ] **Caso Error Análisis 2:** Botones de footer (Minimizar/Limpiar) se ocultan automáticamente para mantener la limpieza.
+  - [ ] Mensaje de éxito: Oculto si hay errores.
 
 - [ ] **Multiselect con Checkboxes (v1.1 NEW)**
   - [ ] Área: Checkboxes visibles en dropdown
