@@ -1325,14 +1325,7 @@ export default function App() {
                     <p className="font-['Noto_Sans:Regular',sans-serif] text-base text-[#5C646F] max-w-[280px] mb-8 leading-relaxed">
                       Aquí aparecerán tus reportes generados en los <span className="font-['Noto_Sans:Bold',sans-serif] text-[#0C5BEF]">últimos 7 días</span>.
                     </p>
-                    <div className="flex items-center gap-2 text-[#A0A5AD] mb-8">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs">
-                        Usa el botón de abajo para comenzar.
-                      </p>
-                    </div>
+
 
                     <button
                       onClick={() => {
