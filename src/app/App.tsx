@@ -539,7 +539,7 @@ export default function App() {
             {/* Botón de acceso directo al Historial/Descargas */}
 
             {/* Botón Descargar con label y dropdown */}
-              {[1, 4].includes(selectedAnalysisId as number) ? (
+              {[1, 2, 4].includes(selectedAnalysisId as number) ? (
                 /* Botón Primario + Secundario con Dropdown para Análisis 4 */
                 <div className="flex gap-2 items-center">
                   <button
@@ -1086,7 +1086,7 @@ export default function App() {
             <div className="px-6 py-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl flex-1">
-                  {[1, 4].includes(selectedAnalysisId as number) ? 'Reporte unificado' : 'Descargar reportes'}
+                  {[1, 2, 4].includes(selectedAnalysisId as number) ? 'Reporte unificado' : 'Descargar reportes'}
                 </h2>
                 <button
                   onClick={() => handleCloseDrawer()}
@@ -1221,7 +1221,7 @@ export default function App() {
                                               {report.name}
                                             </p>
                                             <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">
-                                              {[1, 4].includes(selectedAnalysisId as number) 
+                                              {[1, 2, 4].includes(selectedAnalysisId as number) 
                                                 ? (isCompleted 
                                                     ? `${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'} descargados`
                                                     : `Descargando ${report.collaboratorCount || 1} ${report.collaboratorCount === 1 ? 'reporte' : 'reportes'}`)
@@ -1279,14 +1279,14 @@ export default function App() {
                     {!(selectedAnalysisId === 2 && downloadingReports.length === 0 && getRecentDownloadHistory().length === 0) && (
                       <div className="space-y-3">
 
-                          {![1, 4].includes(selectedAnalysisId as number) && (
+                          {![1, 2, 4].includes(selectedAnalysisId as number) && (
                             <button
                               onClick={() => {
                                 setActiveDrawerTab('generar');
                                 if (selectedAnalysisId === 3) {
                                   setShowReportTypeSelection(true);
                                   setDrawerTitle('Seleccionar tipo de reporte');
-                                } else if ([1, 4].includes(selectedAnalysisId as number)) {
+                                } else if ([1, 2, 4].includes(selectedAnalysisId as number)) {
                                   setShowReportTypeSelection(false);
                                   setDrawerTitle('Reporte unificado');
                                 }
