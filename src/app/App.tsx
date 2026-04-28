@@ -6,7 +6,7 @@ import VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef from '../imports/Vista
 export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [reportType, setReportType] = useState<'Individual' | 'Masivo' | 'AnalisisMatriz'>('Individual');
-  const [drawerTitle, setDrawerTitle] = useState('Reporte Unificado');
+  const [drawerTitle, setDrawerTitle] = useState('Reporte unificado');
   const [activeDrawerTab, setActiveDrawerTab] = useState<'generar' | 'descargas'>('generar');
   const [alcance, setAlcance] = useState('Todos los colaboradores en el análisis');
   const [peso360, setPeso360] = useState('50');
@@ -28,8 +28,8 @@ export default function App() {
   const [showReportOptions, setShowReportOptions] = useState(false);
   const [reportsInQueue, setReportsInQueue] = useState(0);
   const [showAnalysisList, setShowAnalysisList] = useState(true);
-  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number; isIndividual?: boolean }>>([]);
-  const [downloadHistory, setDownloadHistory] = useState<Array<{ id: number; name: string; completedAt: Date; collaboratorCount: number; isIndividual?: boolean }>>([]);
+  const [downloadingReports, setDownloadingReports] = useState<Array<{ id: number; name: string; progress: number; status: 'downloading' | 'completed' | 'error'; collaboratorCount: number; isIndividual?: boolean; reportType?: string }>>([]);
+  const [downloadHistory, setDownloadHistory] = useState<Array<{ id: number; name: string; completedAt: Date; collaboratorCount: number; isIndividual?: boolean; reportType?: string }>>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [errorNotification, setErrorNotification] = useState<{
     title: string;
@@ -39,6 +39,7 @@ export default function App() {
   } | null>(null);
   const [fetchDataError, setFetchDataError] = useState(false);
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<number | null>(null);
+  const [showReportTypeSelection, setShowReportTypeSelection] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +82,8 @@ export default function App() {
             name: report.name,
             completedAt: new Date(),
             collaboratorCount: report.collaboratorCount,
-            isIndividual: report.isIndividual
+            isIndividual: report.isIndividual,
+            reportType: report.reportType
           }
         ]);
       }
@@ -160,6 +162,7 @@ export default function App() {
       setShowAlcanceFieldError(false);
       setAlcanceFieldValue([]);
       setShowReportOptions(false);
+      setShowReportTypeSelection(false);
       // No resetear reportsInQueue aquí para mantener el contador
     }, 300);
   };
@@ -267,6 +270,7 @@ export default function App() {
         {
           id: Date.now(),
           name: selectedColaborador,
+          reportType: drawerTitle,
           progress: 100,
           status: 'completed',
           collaboratorCount: 1,
@@ -288,7 +292,7 @@ export default function App() {
     const collaboratorCount = getColaboradoresCount(alcance, alcanceFieldValue);
     setDownloadingReports((prev) => [
       ...prev,
-      { id: reportId, name: reportName, progress: 0, status: 'downloading', collaboratorCount }
+      { id: reportId, name: reportName, reportType: drawerTitle, progress: 0, status: 'downloading', collaboratorCount }
     ]);
 
     setReportsInQueue((prev) => prev + 1);
@@ -521,7 +525,7 @@ export default function App() {
             {/* Título */}
             <div className="flex gap-1 items-center min-h-8 flex-1 min-w-0">
               <p className="font-['Helvetica_Now_Text_:Extra_Bold',sans-serif] text-[#303A47] text-lg whitespace-nowrap">
-                {selectedAnalysisId === 2 ? 'Análisis de talento semestre 2 2024' : 'Análisis Q2 2025'}
+                {selectedAnalysisId === 4 ? 'Análisis de talento semestre 2 2023' : selectedAnalysisId === 2 ? 'Análisis de talento semestre 2 2024' : selectedAnalysisId === 3 ? 'Análisis de talento semestre 1 2024' : 'Análisis Q2 2025'}
               </p>
               <div className="flex items-center justify-center px-3 py-2 rounded-full size-8 shrink-0">
                 <svg className="w-4 h-4 text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
@@ -535,72 +539,159 @@ export default function App() {
             {/* Botón de acceso directo al Historial/Descargas */}
 
             {/* Botón Descargar con label y dropdown */}
-            <div className="relative" ref={downloadRef}>
-              <button
-                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-                className="bg-[#0C5BEF] flex items-center px-4 py-2.5 rounded-[8px] border-0 shrink-0 hover:bg-[#0A4BC7] transition-all cursor-pointer shadow-md"
-              >
-                <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                    <p className="leading-6">Descargar reportes</p>
-                  </div>
-                  <svg className="w-4 h-4 opacity-80" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7 10l5 5 5-5z"/>
-                  </svg>
-                </div>
-              </button>
+              {selectedAnalysisId === 4 ? (
+                /* Botón Primario + Secundario con Dropdown para Análisis 4 */
+                <div className="flex gap-2 items-center">
+                  <button
+                    onClick={() => {
+                      setShowReportTypeSelection(false);
+                      setDrawerTitle('Reporte unificado');
+                      setIsDrawerOpen(true);
+                      setActiveDrawerTab('generar');
+                    }}
+                    className="bg-[#0C5BEF] flex items-center px-4 py-2.5 rounded-[8px] border-0 shrink-0 hover:bg-[#0A4BC7] transition-all cursor-pointer shadow-md"
+                  >
+                    <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                        <p className="leading-6">Generar reporte unificado</p>
+                      </div>
+                    </div>
+                  </button>
+                  
+                  <div className="relative" ref={downloadRef}>
+                    <button
+                      onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                      className="bg-white flex items-center px-4 py-2.5 rounded-[8px] border border-[#D0D2D5] shrink-0 hover:bg-[#F3F3F4] transition-all cursor-pointer shadow-sm"
+                    >
+                      <div className="flex gap-2.5 items-center text-[#303A47] text-base whitespace-nowrap">
+                        <svg className="w-5 h-5 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <div className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm">
+                          <p className="leading-6">Descargar</p>
+                        </div>
+                        <svg className={`w-4 h-4 text-[#5C646F] transition-transform ${showDownloadMenu ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                      </div>
+                    </button>
 
-              {/* Dropdown menu */}
-              {showDownloadMenu && (
-                <div className="absolute top-full right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-lg min-w-[200px] z-50 py-1">
-                  <button
-                    onClick={() => {
-                      setShowDownloadMenu(false);
-                      setActiveDrawerTab('generar');
-                      setReportType('Individual');
-                      setIsDrawerOpen(true);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left"
-                  >
-                    <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                    {showDownloadMenu && (
+                      <div className="absolute top-full right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-lg min-w-[180px] z-50 py-1 animate-[fadeIn_0.2s_ease-in-out]">
+                        <button className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left text-[#303A47] text-sm font-['Helvetica_Now_Text_:Regular',sans-serif]">
+                          <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Descargar JPG
+                        </button>
+                        <button className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left text-[#303A47] text-sm font-['Helvetica_Now_Text_:Regular',sans-serif] border-t border-[#F3F3F4]">
+                          <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Descargar CSV
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : selectedAnalysisId === 3 ? (
+                /* Botón Primario para Análisis 3 */
+                <button
+                  onClick={() => {
+                    setShowReportTypeSelection(true);
+                    setDrawerTitle('Seleccionar tipo de reporte');
+                    setIsDrawerOpen(true);
+                    setActiveDrawerTab('generar');
+                  }}
+                  className="bg-[#0C5BEF] flex items-center px-4 py-2.5 rounded-[8px] border-0 shrink-0 hover:bg-[#0A4BC7] transition-all cursor-pointer shadow-md"
+                >
+                  <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    <div className="flex-1">
-                      <p className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm text-[#303A47]">
-                        Resultados del análisis
-                      </p>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                        Descargar como PDF
-                      </p>
+                    <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                      <p className="leading-6">Descargar reportes</p>
+                    </div>
+                  </div>
+                </button>
+              ) : (
+                /* Botón con Dropdown para otros Análisis */
+                <div className="relative" ref={downloadRef}>
+                  <button
+                    onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                    className="bg-[#0C5BEF] flex items-center px-4 py-2.5 rounded-[8px] border-0 shrink-0 hover:bg-[#0A4BC7] transition-all cursor-pointer shadow-md"
+                  >
+                    <div className="flex gap-2.5 items-center text-white text-base whitespace-nowrap">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <div className="font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                        <p className="leading-6">Descargar reportes</p>
+                      </div>
+                      <svg className="w-4 h-4 opacity-80" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z"/>
+                      </svg>
                     </div>
                   </button>
-                  <button
-                    onClick={() => {
-                      setShowDownloadMenu(false);
-                      setActiveDrawerTab('generar');
-                      setReportType('Individual');
-                      setIsDrawerOpen(true);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left"
-                  >
-                    <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                    </svg>
-                    <div className="flex-1">
-                      <p className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm text-[#303A47]">
-                        Reporte unificado
-                      </p>
-                      <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
-                        Descargar como ZIP
-                      </p>
+
+                  {/* Dropdown menu */}
+                  {showDownloadMenu && (
+                    <div className="absolute top-full right-0 mt-1 bg-white border border-[#D0D2D5] rounded-lg shadow-lg min-w-[200px] z-50 py-1">
+                      <button
+                        onClick={() => {
+                          setShowDownloadMenu(false);
+                          setShowReportTypeSelection(false);
+                          setDrawerTitle('Resultados del análisis');
+                          setActiveDrawerTab('generar');
+                          setReportType('Individual');
+                          setSelectedColaborador('Adam Andres Abril Acebes');
+                          setIsDrawerOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left"
+                      >
+                        <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                        <div className="flex-1">
+                          <p className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm text-[#303A47]">
+                            Resultados del análisis
+                          </p>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                            Descargar como PDF
+                          </p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDownloadMenu(false);
+                          setShowReportTypeSelection(false);
+                          setDrawerTitle('Reporte unificado');
+                          setActiveDrawerTab('generar');
+                          setReportType('Individual');
+                          setSelectedColaborador('');
+                          setIsDrawerOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#F3F3F4] transition-colors text-left"
+                      >
+                        <svg className="w-4 h-4 text-[#5C646F]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                        <div className="flex-1">
+                          <p className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm text-[#303A47]">
+                            Reporte unificado
+                          </p>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-xs text-[#5C646F]">
+                            Descargar como ZIP
+                          </p>
+                        </div>
+                      </button>
                     </div>
-                  </button>
+                  )}
                 </div>
               )}
-            </div>
 
             {/* Botón Editar */}
             <button
@@ -978,7 +1069,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Drawer - Crear Reporte Unificado */}
+      {/* Drawer - Resultados del análisis */}
       {isDrawerOpen && (
         <>
           {/* Overlay */}
@@ -995,7 +1086,7 @@ export default function App() {
             <div className="px-6 py-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xl flex-1">
-                  Crear Reporte Unificado
+                  Descargar reportes
                 </h2>
                 <button
                   onClick={() => handleCloseDrawer()}
@@ -1125,9 +1216,14 @@ export default function App() {
                                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
                                           )}
-                                          <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
-                                            {report.name}
-                                          </p>
+                                          <div className="flex flex-col min-w-0">
+                                            <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] truncate">
+                                              {report.name}
+                                            </p>
+                                            <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">
+                                              {report.reportType || 'Reporte'}
+                                            </p>
+                                          </div>
                                         </div>
                                         <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                                           {isCompleted ? (
@@ -1178,6 +1274,50 @@ export default function App() {
                     {/* Opciones de acción unificadas */}
                     {!(selectedAnalysisId === 2 && downloadingReports.length === 0 && getRecentDownloadHistory().length === 0) && (
                       <div className="space-y-3">
+                          {selectedAnalysisId === 4 && (
+                            <div className="relative">
+                              <button
+                                onClick={() => setOpenDropdown(openDropdown === 'export_id4' ? null : 'export_id4')}
+                                className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors flex items-center justify-center gap-2"
+                              >
+                                <span>Otras descargas</span>
+                                <svg className={`w-4 h-4 transition-transform ${openDropdown === 'export_id4' ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                              </button>
+                              {openDropdown === 'export_id4' && (
+                                <div className="absolute bottom-full left-0 w-full mb-2 bg-white border border-[#D0D2D5] rounded-lg shadow-xl py-1 z-[110] animate-[fadeIn_0.2s_ease-in-out]">
+                                  <button className="w-full text-left px-4 py-3 hover:bg-[#F3F3F4] text-[#303A47] text-sm font-['Helvetica_Now_Text_:Regular',sans-serif] flex items-center gap-3 transition-colors">
+                                    <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Descargar JPG
+                                  </button>
+                                  <button className="w-full text-left px-4 py-3 hover:bg-[#F3F3F4] text-[#303A47] text-sm font-['Helvetica_Now_Text_:Regular',sans-serif] flex items-center gap-3 transition-colors border-t border-[#F3F3F4]">
+                                    <svg className="w-4 h-4 text-[#5C646F]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Descargar CSV
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <button
+                            onClick={() => {
+                              setActiveDrawerTab('generar');
+                              if (selectedAnalysisId === 3) {
+                                setShowReportTypeSelection(true);
+                                setDrawerTitle('Seleccionar tipo de reporte');
+                              } else if (selectedAnalysisId === 4) {
+                                setShowReportTypeSelection(false);
+                                setDrawerTitle('Reporte unificado');
+                              }
+                            }}
+                            className="w-full bg-[#F3F3F4] text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-transparent hover:bg-[#E7E8EA] transition-colors"
+                          >
+                            Descargar más reportes
+                          </button>
                           <button
                             onClick={handleExitAndDownload}
                             className="w-full bg-white text-[#303A47] px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Regular',sans-serif] text-base border border-[#D0D2D5] hover:bg-[#F3F3F4] transition-colors"
@@ -1207,21 +1347,100 @@ export default function App() {
                     <p className="font-['Noto_Sans:Regular',sans-serif] text-base text-[#5C646F] max-w-[280px] mb-8 leading-relaxed">
                       Aquí aparecerán tus reportes generados en los <span className="font-['Noto_Sans:Bold',sans-serif] text-[#0C5BEF]">últimos 7 días</span>.
                     </p>
-                    <div className="flex items-center gap-2 text-[#A0A5AD]">
+                    <div className="flex items-center gap-2 text-[#A0A5AD] mb-8">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <p className="font-['Noto_Sans:Regular',sans-serif] text-xs">
-                        Usa la pestaña "Generar reporte" para comenzar.
+                        Usa el botón de abajo para comenzar.
                       </p>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        setActiveDrawerTab('generar');
+                        if (selectedAnalysisId === 3) {
+                          setShowReportTypeSelection(true);
+                        }
+                      }}
+                      className="w-full bg-[#0C5BEF] text-white px-4 py-3 rounded-lg font-['Helvetica_Now_Text_:Bold',sans-serif] text-base hover:bg-[#0A4BC7] transition-all shadow-md"
+                    >
+                      Descargar reportes
+                    </button>
                   </div>
                 )}
               </div>
             ) : (
               // Vista de formulario original
               <div className="flex-1 overflow-y-auto px-6 py-6">
-              {/* Tipo de Reporte */}
+                {showReportTypeSelection ? (
+                  <div className="space-y-4">
+                    <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
+                      Seleccionar tipo de reporte
+                    </label>
+                    <button
+                      onClick={() => {
+                        setShowReportTypeSelection(false);
+                        setDrawerTitle('Resultados del análisis');
+                        setReportType('Individual');
+                        setSelectedColaborador('Adam Andres Abril Acebes');
+                      }}
+                      className="w-full flex items-center gap-4 p-4 border border-[#D0D2D5] rounded-xl hover:border-[#0C5BEF] hover:bg-[#F8F9FF] transition-all text-left group"
+                    >
+                      <div className="w-12 h-12 rounded-lg bg-[#F3F3F4] group-hover:bg-[#E7F0FF] flex items-center justify-center shrink-0 transition-colors">
+                        <svg className="w-6 h-6 text-[#5C646F] group-hover:text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-base text-[#303A47]">Resultados del análisis</p>
+                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F]">Informe detallado de los resultados individuales y por dimensiones</p>
+                      </div>
+                      <svg className="w-5 h-5 text-[#D0D2D5] group-hover:text-[#0C5BEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowReportTypeSelection(false);
+                        setDrawerTitle('Reporte unificado');
+                        setReportType('Individual');
+                        setSelectedColaborador('');
+                      }}
+                      className="w-full flex items-center gap-4 p-4 border border-[#D0D2D5] rounded-xl hover:border-[#0C5BEF] hover:bg-[#F8F9FF] transition-all text-left group"
+                    >
+                      <div className="w-12 h-12 rounded-lg bg-[#F3F3F4] group-hover:bg-[#E7F0FF] flex items-center justify-center shrink-0 transition-colors">
+                        <svg className="w-6 h-6 text-[#5C646F] group-hover:text-[#0C5BEF]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-base text-[#303A47]">Reporte unificado</p>
+                        <p className="font-['Noto_Sans:Regular',sans-serif] text-sm text-[#5C646F]">Consolidado de resultados y métricas de desempeño en un solo reporte</p>
+                      </div>
+                      <svg className="w-5 h-5 text-[#D0D2D5] group-hover:text-[#0C5BEF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                  {selectedAnalysisId === 3 && (
+                    <button
+                      onClick={() => {
+                        setShowReportTypeSelection(true);
+                        setDrawerTitle('Seleccionar tipo de reporte');
+                      }}
+                      className="mb-6 flex items-center gap-2 text-[#0C5BEF] font-['Helvetica_Now_Text_:Bold',sans-serif] text-xs uppercase tracking-wide hover:underline"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Cambiar tipo de reporte
+                    </button>
+                  )}
+                  {/* Tipo de Reporte */}
               <div className="mb-6">
                 <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
                   Tipo de reporte
@@ -1232,6 +1451,9 @@ export default function App() {
                       setReportType('Individual');
                       setAlcanceFieldValue([]);
                       setShowAlcanceFieldError(false);
+                      if (drawerTitle === 'Resultados del análisis') {
+                        setSelectedColaborador('Adam Andres Abril Acebes');
+                      }
                     }}
                     className={`flex-1 py-2 px-4 rounded-md font-['Helvetica_Now_Text_:Regular',sans-serif] text-sm transition-all ${
                       reportType === 'Individual'
@@ -1534,98 +1756,77 @@ export default function App() {
                 </>
               )}
 
-              {/* Configuración de Pesos */}
-              <div className="mb-6">
-                <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
-                  Configuración de pesos
-                </label>
-                <p className="text-[#5C646F] text-xs mb-4 font-['Noto_Sans:Regular',sans-serif]">
-                  La suma de los porcentajes debe ser exactamente 100%
-                </p>
-
-                {/* Evaluación 360 */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
-                      Evaluación 360
-                    </label>
-                    <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                      %
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    value={peso360}
-                    onChange={(e) => setPeso360(e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                      hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                    }`}
-                  />
-                  {hasPesoError && (
-                    <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                      {totalPeso > 100
-                        ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
-                        : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
-                      }
-                    </p>
-                  )}
-                </div>
-
-                {/* Cumplimiento de Objetivos */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
-                      Cumplimiento de Objetivos
-                    </label>
-                    <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                      %
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    value={pesoObjetivos}
-                    onChange={(e) => setPesoObjetivos(e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                      hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                    }`}
-                  />
-                  {hasPesoError && (
-                    <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                      {totalPeso > 100
-                        ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
-                        : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
-                      }
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Total Peso Asignado */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs uppercase tracking-wide">
-                    Total peso asignado
+              {/* Configuración de Pesos - Solo visible en el drawer de Reporte unificado */}
+              {drawerTitle === 'Reporte unificado' && (
+                <div className="mt-6 pt-6 border-t border-[#D0D2D5]">
+                  <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
+                    Configuración de pesos
                   </label>
-                  <span className={`px-3 py-1 rounded-full text-xs font-['Helvetica_Now_Text_:Bold',sans-serif] flex items-center gap-1 ${
-                    totalPeso === 100
-                      ? 'bg-[#F3F3F4] text-[#5C646F]'
-                      : 'bg-[#FEF3F2] text-[#D92D20]'
-                  }`}>
-                    {totalPeso === 100 ? (
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                      </svg>
-                    ) : (
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-                      </svg>
+                  <p className="text-[#5C646F] text-xs mb-4 font-['Noto_Sans:Regular',sans-serif]">
+                    La suma de los porcentajes debe ser exactamente 100%
+                  </p>
+
+                  {/* Evaluación 360 */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
+                        Evaluación 360
+                      </label>
+                      <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                        %
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      value={peso360}
+                      onChange={(e) => setPeso360(e.target.value)}
+                      className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
+                        hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
+                      }`}
+                    />
+                    {hasPesoError && (
+                      <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
+                        {totalPeso > 100
+                          ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
+                          : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
+                        }
+                      </p>
                     )}
-                    Total: {totalPeso}%
-                  </span>
+                  </div>
+
+                  {/* Cumplimiento de Objetivos */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
+                        Cumplimiento de Objetivos
+                      </label>
+                      <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                        %
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      value={pesoObjetivos}
+                      onChange={(e) => setPesoObjetivos(e.target.value)}
+                      className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
+                        hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
+                      }`}
+                    />
+                    {hasPesoError && (
+                      <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
+                        {totalPeso > 100
+                          ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
+                          : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
+                        }
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
-            )}
+              )}
+            </>
+          )}
+        </div>
+      )}
 
             {/* Footer Actions - Solo mostrar si está en tab de generar reporte */}
             {activeDrawerTab === 'generar' && (
