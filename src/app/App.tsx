@@ -12,6 +12,7 @@ export default function App() {
   const [alcance, setAlcance] = useState('Todos los colaboradores en el análisis');
   const [peso360, setPeso360] = useState('50');
   const [pesoObjetivos, setPesoObjetivos] = useState('50');
+  const [calibrationMode, setCalibrationMode] = useState<'original' | 'calibrated'>('original');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedColaboradores, setSelectedColaboradores] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -173,6 +174,7 @@ export default function App() {
       setAlcance('Todos los colaboradores en el análisis');
       setPeso360('50');
       setPesoObjetivos('50');
+      setCalibrationMode('original');
       setShowColaboradorError(false);
       setShowAlcanceFieldError(false);
       setAlcanceFieldValue([]);
@@ -214,6 +216,7 @@ export default function App() {
       setAlcance('Todos los colaboradores en el análisis');
       setPeso360('50');
       setPesoObjetivos('50');
+      setCalibrationMode('original');
       setShowColaboradorError(false);
       setShowAlcanceFieldError(false);
       setAlcanceFieldValue([]);
@@ -1655,71 +1658,136 @@ export default function App() {
                 </>
               )}
 
-              {/* Configuración de Pesos - Solo visible en el drawer de Reporte unificado */}
-              {drawerTitle === 'Reporte unificado' && (
+              {/* Sección de configuración adicional (Valores y Pesos) */}
+              {(drawerTitle === 'Reporte unificado' || [3, 4].includes(selectedAnalysisId as number)) && (
                 <div className="mt-6 pt-6 border-t border-[#D0D2D5]">
-                  <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
-                    Configuración de pesos
-                  </label>
-                  <p className="text-[#5C646F] text-xs mb-4 font-['Noto_Sans:Regular',sans-serif]">
-                    La suma de los porcentajes debe ser exactamente 100%
-                  </p>
+                  {/* Valores para el reporte */}
+                  <div className="mb-6">
+                    <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-3 uppercase tracking-wide">
+                      Valores para el reporte
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Card Originales */}
+                      <button
+                        onClick={() => setCalibrationMode('original')}
+                        className={`p-3 rounded-xl border text-left transition-all duration-200 group ${
+                          calibrationMode === 'original'
+                            ? 'border-[#0C5BEF] bg-[#F8F9FF] shadow-sm'
+                            : 'border-[#D0D2D5] bg-white hover:border-[#0C5BEF] hover:bg-[#F8F9FF]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                            calibrationMode === 'original' ? 'border-[#0C5BEF] bg-[#0C5BEF]' : 'border-[#D0D2D5] bg-white'
+                          }`}>
+                            {calibrationMode === 'original' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                          </div>
+                        </div>
+                        <p className={`font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm mb-1 ${
+                          calibrationMode === 'original' ? 'text-[#0C5BEF]' : 'text-[#303A47]'
+                        }`}>
+                          Originales
+                        </p>
+                        <p className="text-[#5C646F] text-[10px] font-['Noto_Sans:Regular',sans-serif] leading-tight">
+                          Valores iniciales de objetivos, 360 y cuadrante.
+                        </p>
+                      </button>
 
-                  {/* Evaluación 360 */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
-                        Evaluación 360
-                      </label>
-                      <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                        %
-                      </span>
+                      {/* Card Calibrados */}
+                      <button
+                        onClick={() => setCalibrationMode('calibrated')}
+                        className={`p-3 rounded-xl border text-left transition-all duration-200 group ${
+                          calibrationMode === 'calibrated'
+                            ? 'border-[#0C5BEF] bg-[#F8F9FF] shadow-sm'
+                            : 'border-[#D0D2D5] bg-white hover:border-[#0C5BEF] hover:bg-[#F8F9FF]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                            calibrationMode === 'calibrated' ? 'border-[#0C5BEF] bg-[#0C5BEF]' : 'border-[#D0D2D5] bg-white'
+                          }`}>
+                            {calibrationMode === 'calibrated' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                          </div>
+                        </div>
+                        <p className={`font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm mb-1 ${
+                          calibrationMode === 'calibrated' ? 'text-[#0C5BEF]' : 'text-[#303A47]'
+                        }`}>
+                          Calibrados
+                        </p>
+                        <p className="text-[#5C646F] text-[10px] font-['Noto_Sans:Regular',sans-serif] leading-tight">
+                          Valores reubicados tras el ajuste en matriz.
+                        </p>
+                      </button>
                     </div>
-                    <input
-                      type="number"
-                      value={peso360}
-                      onChange={(e) => setPeso360(e.target.value)}
-                      className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                        hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                      }`}
-                    />
-                    {hasPesoError && (
-                      <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                        {totalPeso > 100
-                          ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
-                          : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
-                        }
-                      </p>
-                    )}
                   </div>
 
-                  {/* Cumplimiento de Objetivos */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
-                        Cumplimiento de Objetivos
+                  {/* Configuración de Pesos - Solo visible en el drawer de Reporte unificado */}
+                  {drawerTitle === 'Reporte unificado' && (
+                    <>
+                      <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-2 uppercase tracking-wide">
+                        Configuración de pesos
                       </label>
-                      <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
-                        %
-                      </span>
-                    </div>
-                    <input
-                      type="number"
-                      value={pesoObjetivos}
-                      onChange={(e) => setPesoObjetivos(e.target.value)}
-                      className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
-                        hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
-                      }`}
-                    />
-                    {hasPesoError && (
-                      <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
-                        {totalPeso > 100
-                          ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
-                          : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
-                        }
+                      <p className="text-[#5C646F] text-xs mb-4 font-['Noto_Sans:Regular',sans-serif]">
+                        La suma de los porcentajes debe ser exactamente 100%
                       </p>
-                    )}
-                  </div>
+
+                      {/* Evaluación 360 */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
+                            Evaluación 360
+                          </label>
+                          <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                            %
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          value={peso360}
+                          onChange={(e) => setPeso360(e.target.value)}
+                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
+                            hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
+                          }`}
+                        />
+                        {hasPesoError && (
+                          <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
+                            {totalPeso > 100
+                              ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
+                              : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
+                            }
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Cumplimiento de Objetivos */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="font-['Helvetica_Now_Text_:Regular',sans-serif] text-[#303A47] text-sm">
+                            Cumplimiento de Objetivos
+                          </label>
+                          <span className="bg-[#E7F0FF] text-[#0C5BEF] px-2 py-1 rounded text-xs font-['Helvetica_Now_Text_:Bold',sans-serif]">
+                            %
+                          </span>
+                        </div>
+                        <input
+                          type="number"
+                          value={pesoObjetivos}
+                          onChange={(e) => setPesoObjetivos(e.target.value)}
+                          className={`w-full px-4 py-3 border rounded-lg font-['Noto_Sans:Regular',sans-serif] text-sm text-[#303A47] focus:outline-none focus:border-[#0C5BEF] focus:ring-1 focus:ring-[#0C5BEF] ${
+                            hasPesoError ? 'border-[#D92D20]' : 'border-[#D0D2D5]'
+                          }`}
+                        />
+                        {hasPesoError && (
+                          <p className="text-[#D92D20] text-xs mt-1 font-['Noto_Sans:Regular',sans-serif]">
+                            {totalPeso > 100
+                              ? `Reduce este porcentaje. La suma actual es ${totalPeso}%.`
+                              : `Aumenta este porcentaje. La suma actual es ${totalPeso}%.`
+                            }
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </>
