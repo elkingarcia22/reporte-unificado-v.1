@@ -42,6 +42,8 @@ export default function App() {
   const [fetchDataError, setFetchDataError] = useState(false);
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<number | null>(null);
   const [showReportTypeSelection, setShowReportTypeSelection] = useState(false);
+  const [showExecutiveSummary, setShowExecutiveSummary] = useState(true);
+  const [showTalentMatrix, setShowTalentMatrix] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
 
@@ -318,7 +320,7 @@ export default function App() {
 
       if (selectedColaboradores.length === 1) {
         // Un solo colaborador: abrir en nueva pestaña
-        window.open('?pdf-preview=true', '_blank');
+        window.open(`?pdf-preview=true&exec_summary=${showExecutiveSummary}&talent_matrix=${showTalentMatrix}`, '_blank');
         setIsDownloading(true);
         setShowDownloadPanel(true);
         setDownloadComplete(true);
@@ -455,10 +457,11 @@ export default function App() {
     setDownloadingReports(newReports);
   };
 
-  // Si estamos en modo preview del PDF
+  // Si estamos en modo preview del PDF (nueva pestaña)
   if (isPdfPreviewMode) {
     return (
       <div className="h-screen w-screen overflow-hidden">
+        {/* En nueva pestaña, dejamos que el componente lea de la URL */}
         <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
       </div>
     );
@@ -473,7 +476,10 @@ export default function App() {
           if (e.target === e.currentTarget) handleClosePdfViewer();
         }}
       >
-        <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef />
+        <VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef 
+          showExecSummary={showExecutiveSummary} 
+          showTalentMatrix={showTalentMatrix} 
+        />
       </div>
     );
   }
@@ -1719,6 +1725,39 @@ export default function App() {
                         </p>
                       </button>
                     </div>
+                  
+                  {/* Contenido del reporte */}
+                  <div className="mb-6 mt-6">
+                    <label className="block font-['Helvetica_Now_Text_:Bold',sans-serif] text-[#303A47] text-xs mb-3 uppercase tracking-wide">
+                      Contenido del reporte
+                    </label>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border border-[#D0D2D5] rounded-lg bg-white">
+                        <div className="flex flex-col">
+                          <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm text-[#303A47]">Resumen Ejecutivo</p>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">Incluir síntesis de resultados y fortalezas generado por IA</p>
+                        </div>
+                        <button 
+                          onClick={() => setShowExecutiveSummary(!showExecutiveSummary)}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${showExecutiveSummary ? 'bg-[#0C5BEF]' : 'bg-[#D0D2D5]'}`}
+                        >
+                          <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${showExecutiveSummary ? 'translate-x-5' : 'translate-x-1'}`} />
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border border-[#D0D2D5] rounded-lg bg-white">
+                        <div className="flex flex-col">
+                          <p className="font-['Helvetica_Now_Text_:Bold',sans-serif] text-sm text-[#303A47]">Matriz de Talento</p>
+                          <p className="font-['Noto_Sans:Regular',sans-serif] text-[10px] text-[#5C646F]">Mostrar cuadrante y posicionamiento</p>
+                        </div>
+                        <button 
+                          onClick={() => setShowTalentMatrix(!showTalentMatrix)}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${showTalentMatrix ? 'bg-[#0C5BEF]' : 'bg-[#D0D2D5]'}`}
+                        >
+                          <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${showTalentMatrix ? 'translate-x-5' : 'translate-x-1'}`} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   </div>
 
                   {/* Configuración de Pesos - Solo visible en el drawer de Reporte unificado */}

@@ -467,9 +467,9 @@ function Background1() {
   );
 }
 
-function BackgroundBorderShadow() {
+function BackgroundBorderShadow({ showTalentMatrix = true }: { showTalentMatrix?: boolean }) {
   return (
-    <div className="bg-white col-[1/span_2] justify-self-stretch relative rounded-[12px] row-1 self-start shrink-0" data-name="Background+Border+Shadow">
+    <div className={`bg-white ${showTalentMatrix ? 'col-[1/span_2]' : 'col-[1/span_3]'} justify-self-stretch relative rounded-[12px] row-1 self-start shrink-0`} data-name="Background+Border+Shadow">
       <div aria-hidden="true" className="absolute border border-[rgba(195,198,214,0.05)] border-solid inset-0 pointer-events-none rounded-[12px] shadow-[0px_8px_32px_0px_rgba(20,27,44,0.06)]" />
       <div className="content-stretch flex flex-col gap-[16px] items-start p-[25px] relative size-full">
         <Container24 />
@@ -704,11 +704,11 @@ function BackgroundBorderShadow3() {
   );
 }
 
-function Section2ExecutiveSummaryCards() {
+function Section2ExecutiveSummaryCards({ showTalentMatrix = true }: { showTalentMatrix?: boolean }) {
   return (
     <div className="gap-x-[16px] gap-y-[16px] grid grid-cols-[repeat(5,minmax(0,1fr))] grid-rows-[_162px] pt-[8px] relative shrink-0 w-full" data-name="Section 2: Executive Summary Cards">
-      <BackgroundBorderShadow />
-      <BackgroundBorderShadow1 />
+      <BackgroundBorderShadow showTalentMatrix={showTalentMatrix} />
+      {showTalentMatrix && <BackgroundBorderShadow1 />}
       <BackgroundBorderShadow2 />
       <BackgroundBorderShadow3 />
     </div>
@@ -731,8 +731,14 @@ function Heading2() {
   return (
     <div className="content-stretch flex gap-[12px] items-center relative shrink-0 w-full" data-name="Heading 2">
       <Container41 />
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[32px] justify-center leading-[0] relative shrink-0 text-[24px] text-white w-[222.56px]">
+      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[32px] justify-center leading-[0] relative shrink-0 text-[24px] text-white w-auto">
         <p className="leading-[32px]">Resumen Ejecutivo</p>
+      </div>
+      <div className="bg-[rgba(255,255,255,0.15)] border border-[rgba(255,255,255,0.3)] flex items-center gap-1.5 px-3 py-1 rounded-full ml-2 backdrop-blur-sm">
+        <svg className="w-3 h-3 text-[#B2C5FF]" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M7.5 5.6L10 7L8.6 4.5L10 2L7.5 3.4L5 2L6.4 4.5L5 7L7.5 5.6ZM19.5 15.4L17 14L18.4 16.5L17 19L19.5 17.6L22 19L20.6 16.5L22 14L19.5 15.4ZM22 2L19.5 3.4L17 2L18.4 4.5L17 7L19.5 5.6L22 7L20.6 4.5L22 2ZM14.59 6.26L3.91 16.94C3.52 17.33 3.52 17.97 3.91 18.36L5.64 20.09C6.03 20.48 6.67 20.48 7.06 20.09L17.74 9.41C18.13 9.02 18.13 8.38 17.74 7.99L16.01 6.26C15.62 5.87 14.98 5.87 14.59 6.26Z" />
+        </svg>
+        <p className="font-['Inter:Bold',sans-serif] font-bold text-[10px] text-white uppercase tracking-[0.5px]">Generado por IA</p>
       </div>
     </div>
   );
@@ -2426,13 +2432,13 @@ function SectionPropuestaDePlanDeDesarrolloPorCompetencias() {
   );
 }
 
-function Main() {
+function Main({ showExecSummary = true, showTalentMatrix = true }: { showExecSummary?: boolean, showTalentMatrix?: boolean }) {
   return (
     <div className="bg-[#f9f9ff] relative shrink-0 w-full" data-name="Main">
       <div className="content-stretch flex flex-col gap-[32px] items-start p-[64px] relative size-full">
         <Section1Header />
-        <Section2ExecutiveSummaryCards />
-        <Section3UnifiedExecutiveSummaryBlock />
+        <Section2ExecutiveSummaryCards showTalentMatrix={showTalentMatrix} />
+        {showExecSummary && <Section3UnifiedExecutiveSummaryBlock />}
         <Section4DetailedScoreBreakdownWithRadarChart />
         <SectionPropuestaDePlanDeDesarrolloPorCompetencias />
       </div>
@@ -2440,32 +2446,55 @@ function Main() {
   );
 }
 
-function Background() {
+function Background({ showExecSummary = true, showTalentMatrix = true }: { showExecSummary?: boolean, showTalentMatrix?: boolean }) {
   return (
     <div className="bg-white content-stretch flex flex-col items-start max-w-[1100px] min-h-[1122.52001953125px] relative shrink-0 w-[1100px]" data-name="Background">
       <div className="absolute bg-[rgba(255,255,255,0)] inset-[0_0_-0.5px_0] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.5)]" data-name="Overlay+Shadow" />
-      <Main />
+      <Main showExecSummary={showExecSummary} showTalentMatrix={showTalentMatrix} />
     </div>
   );
 }
 
-function PdfMainViewport() {
+function PdfMainViewport({ showExecSummary = true, showTalentMatrix = true }: { showExecSummary?: boolean, showTalentMatrix?: boolean }) {
   return (
-    <div className="bg-[#1e293b] h-[2343px] relative shrink-0 w-full z-[1]" data-name="PDF Main Viewport">
+    <div className="bg-[#1e293b] h-auto min-h-screen relative shrink-0 w-full z-[1]" data-name="PDF Main Viewport">
       <div className="overflow-clip rounded-[inherit] size-full">
         <div className="content-stretch flex flex-col items-center pb-[74px] pt-[24px] px-[90px] relative size-full">
-          <Background />
+          <Background showExecSummary={showExecSummary} showTalentMatrix={showTalentMatrix} />
         </div>
       </div>
     </div>
   );
 }
 
-export default function VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef() {
+export default function VistaPreviaPdfReporteEjecutivoFinalNuevoAzul0C5Bef({ 
+  showExecSummary: propShowExecSummary, 
+  showTalentMatrix: propShowTalentMatrix 
+}: { 
+  showExecSummary?: boolean; 
+  showTalentMatrix?: boolean; 
+} = {}) {
+  const params = new URLSearchParams(window.location.search);
+  
+  const urlExec = params.get('exec_summary');
+  const urlMatrix = params.get('talent_matrix');
+
+  // Decisión final: 
+  // 1. Si la prop está definida, manda la prop.
+  // 2. Si no, si el parámetro de URL es 'false', es false.
+  // 3. En cualquier otro caso (incluyendo null/undefined), es true por defecto.
+  const showExecSummary = propShowExecSummary !== undefined 
+    ? propShowExecSummary 
+    : (urlExec === 'false' ? false : true);
+    
+  const showTalentMatrix = propShowTalentMatrix !== undefined 
+    ? propShowTalentMatrix 
+    : (urlMatrix === 'false' ? false : true);
+
   return (
     <div className="content-stretch flex flex-col isolate items-start relative size-full overflow-y-auto" style={{ backgroundImage: "linear-gradient(90deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)" }} data-name="Vista Previa PDF - Reporte Ejecutivo Final (Nuevo Azul #0C5BEF)">
       <HeaderPdfViewerToolbar />
-      <PdfMainViewport />
+      <PdfMainViewport showExecSummary={showExecSummary} showTalentMatrix={showTalentMatrix} />
     </div>
   );
 }
